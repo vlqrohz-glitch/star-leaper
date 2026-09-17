@@ -1,0 +1,36 @@
+# Netlify Configuration for Star-Leaper: Orion Odyssey (starleaper.io)
+# Documentation: https://docs.netlify.com/configure-builds/file-based-configuration/
+
+[build]
+  # The directory containing the deploy-ready HTML, JS, and asset files
+  publish = "."
+
+# Production Headers & Security Optimizations
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "SAMEORIGIN"
+    X-Content-Type-Options = "nosniff"
+    X-XSS-Protection = "1; mode=block"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+    Access-Control-Allow-Origin = "*"
+
+# Immutable Cache for Engine Libraries (Phaser 3)
+[[headers]]
+  for = "/lib/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Optimized Cache for ES Module Source Code
+[[headers]]
+  for = "/src/*"
+  [headers.values]
+    Cache-Control = "public, max-age=3600, must-revalidate"
+
+# Single Page App Routing & Static Asset Passthrough
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+  force = false

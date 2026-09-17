@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Stage 9 Validation Suite - Star-Leaper</title>
+  <script src="./lib/phaser.min.js"></script>
+  <style>
+    body { font-family: monospace; background: #0b0f19; color: #f8fafc; padding: 20px; }
+    .pass { color: #4ade80; font-weight: bold; }
+    .fail { color: #f87171; font-weight: bold; }
+    #summary { font-size: 1.2rem; margin-bottom: 15px; }
+    .test-row { padding: 4px 0; border-bottom: 1px solid #1e293b; }
+  </style>
+</head>
+<body>
+  <h1>Stage 9 Automated Validation Suite</h1>
+  <div id="summary">Running tests...</div>
+  <div id="results"></div>
+
+  <script type="module">
+    import { UIState, UI_CONFIG } from './src/config/uiConfig.js';
+    import { UISystem } from './src/systems/UISystem.js';
+    import { LEVEL_1_DATA } from './src/levels/level1.js';
+    import { PowerUpSystem } from './src/systems/PowerUpSystem.js';
+    import { HealthSystem } from './src/systems/HealthSystem.js';
+    import { LivesSystem } from './src/systems/LivesSystem.js';
+    import { ScoreSystem } from './src/systems/ScoreSystem.js';
+    import { LevelCompletionSystem } from './src/systems/LevelCompletionSystem.js';
+    import { POWERUP_CONFIG, PowerUpState, PowerUpType } from './src/config/powerUpConfig.js';
+    import { HEALTH_CONFIG } from './src/config/playerHealthConfig.js';
+
+    const testResults = [];
+    function assert(testId, description, condition) {
+      testResults.push({ id: testId, description, passed: !!condition });
+    }
+
+    class MockEvents {
+      constructor() { this.listeners = {}; this.emitted = []; }
+      on(evt, fn) { if (!this.listeners[evt]) this.listeners[evt] = []; this.listeners[evt].push(fn); }
+      emit(evt, payload) {
+        this.emitted.push({ evt, payload });
+        if (this.listeners[evt]) this.listeners[evt].forEach(fn => fn(payload));
+      }
+    }
+
+    class MockGameObject {
+      constructor(type) {
+        this.type = type;
+        this.visible = true;
+        this.alpha = 1;
+        this.depth = 0;
+        this.scrollFactorX = 1;
+        this.scrollFactorY = 1;
+        this.text = '';
+        this.color = '';
+        this.children = [];
+      }
+      setVisible(v) { this.visible = v; return this; }
+      setAlpha(a) { this.alpha = a; return this; }
+      setDepth(d) { this.depth = d; return this; }
+      setScrollFactor(x, y = x) { this.scrollFactorX = x; this.scrollFactorY = y; return this; }
+      setText(t) { this.text = t; return this; }
+      setColor(c) { this.color = c; return this; }
+      setOrigin() { return this; }
+      setStrokeStyle() { return this; }
+      add(items) {
+        if (Array.isArray(items)) this.children.push(...items);
+        else this.children.push(items);
+        return this;
+      }
+    }
+
+    class MockScene {
+      constructor() {
+        this.events = new MockEvents();
+        this.isGameOver = false;
+        this.tweens = {
+          add: (cfg) => {
+            if (cfg.onComplete) setTimeout(cfg.onComplete, 10);
+            return { stop: () => {} };
+          },
+          killTweensOf: () => {}
+        };
+        this.add = {
+          container: (x, y) => new MockGameObject('container'),
+          rectangle: (x, y, w, h, col, a) => new MockGameObject('rectangle'),
+          text: (x, y, txt, style) => {
+            const t = new MockGameObject('text');
+            t.text = txt;
+            return t;
+          }
+        };
+        this.levelCompletionSystem = new LevelCompletionSystem(this);
+        this.powerUpSystem = new PowerUpSystem(this);
+        this.healthSystem = new HealthSystem(this);
+        this.livesSystem = new LivesSystem(this);
+        this.scoreSystem = new ScoreSystem(this, 20);
+      }
+    }
+
+    const scene = new MockScene();
+    const ui = new UISystem(scene);
+    ui.initialize();
+
+    // TEST A: Title screen appears on initial launch
+    assert('TEST A', 'Title screen appears on initial launch',
+      ui.getState() === UIState.TITLE && ui.isTitleActive() && ui.titleContainer.visible);
+
+    // TEST B: UIState enum integrity
+    assert('TEST B', 'UIState contains all required states',
+      UIState.TITLE === 'TITLE' && UIState.GAMEPLAY === 'GAMEPLAY' &&
+      UIState.GAME_OVER === 'GAME_OVER' && UIState.LEVEL_COMPLETE === 'LEVEL_COMPLETE');
+
+    // TEST C: Title screen transitions to gameplay on hide
+    ui.hideTitleScreen();
+    assert('TEST C', 'Title screen disappears after starting',
+      ui.getState() === UIState.GAMEPLAY && !ui.isTitleActive() && !ui.titleContainer.visible);
+
+    // TEST D: Gameplay HUD appears correctly
+    assert('TEST D', 'Gameplay HUD is visible in GAMEPLAY state',
+      ui.hudContainer.visible);
+
+    // TEST E: Score displays correctly with leading zeroes
+    scene.scoreSystem.addScore(350);
+    ui.updateHUD();
+    assert('TEST E', 'Score displays correctly formatted with 6 digits',
+      ui.hudScoreText.text.includes('SCORE: 000350'));
+
+    // TEST F: Star Crystal counter displays correctly
+    scene.scoreSystem.addScore(100); // 1 crystal collected
+    ui.updateHUD();
+    assert('TEST F', 'Star Crystal counter displays correctly formatted',
+      ui.hudScoreText.text.includes('CRYSTALS: 01 / 20'));
+
+    // TEST G: Health display reflects HealthSystem
+    assert('TEST G', 'Health display shows segmented shields [■■■] 3/3',
+      ui.hudStatusText.text.includes('HEALTH: [■■■] 3/3'));
+
+    // TEST H: Lives display reflects LivesSystem
+    assert('TEST H', 'Lives display shows 3 lives',
+      ui.hudStatusText.text.includes('LIVES: 3'));
+
+    // TEST I: Aegis display reflects inactive state
+    assert('TEST I', 'Aegis display reflects inactive state (--)',
+      ui.hudPowerUpText.text === 'AEGIS: --');
+
+    // TEST J: Aegis timer displays actual remaining duration
+    scene.powerUpSystem.activatePowerUp('AEGIS_CORE');
+    ui.updateHUD();
+    assert('TEST J', 'Aegis timer displays active duration when power-up active',
+      ui.hudPowerUpText.text.includes('AEGIS: ACTIVE  10.0s') && ui.hudPowerUpText.color === UI_CONFIG.COLOR_CYAN);
+
+    // TEST K: Aegis display warns at <= 1000ms and clears on expiration
+    scene.powerUpSystem.activePowerUp.remainingDuration = 800; // <= 1000ms
+    ui.updateHUD();
+    const warningAmber = ui.hudPowerUpText.color === UI_CONFIG.COLOR_WARNING;
+    scene.powerUpSystem.reset();
+    ui.updateHUD();
+    const clearedState = ui.hudPowerUpText.text === 'AEGIS: --';
+    assert('TEST K', 'Aegis display pulses amber warning and clears after expiration',
+      warningAmber && clearedState);
+
+    // TEST L: Score updates dynamically on crystal collection
+    scene.scoreSystem.addScore(100);
+    ui.updateHUD();
+    assert('TEST L', 'Score updates after collecting Star Crystal',
+      ui.hudScoreText.text.includes('SCORE: 000550') && ui.hudScoreText.text.includes('CRYSTALS: 02 / 20'));
+
+    // TEST O: Health display updates after damage
+    scene.healthSystem.takeDamage(1);
+    ui.updateHUD();
+    assert('TEST O', 'Health display updates after damage to [■■□] 2/3',
+      ui.hudStatusText.text.includes('HEALTH: [■■□] 2/3'));
+
+    // TEST P: Lives display updates after life lost
+    scene.livesSystem.loseLife();
+    ui.updateHUD();
+    assert('TEST P', 'Lives display updates after death to 2',
+      ui.hudStatusText.text.includes('LIVES: 2'));
+
+    // TEST R: Game Over screen appears correctly
+    ui.showGameOver();
+    assert('TEST R', 'Game Over screen appears and sets UIState.GAME_OVER',
+      ui.getState() === UIState.GAME_OVER && ui.gameOverContainer.visible);
+
+    // TEST S: Game Over statistics are accurate
+    assert('TEST S', 'Game Over statistics show final score and crystals',
+      ui.gameOverStatsText.text.includes('FINAL SCORE:    000550') &&
+      ui.gameOverStatsText.text.includes('STAR CRYSTALS:  02 / 20'));
+
+    // TEST U: Single-screen constraint - Level Complete cannot override Game Over
+    ui.showLevelComplete({ score: 1000, crystalsCollected: 10, crystalsTotal: 20 });
+    assert('TEST U', 'Level complete cannot display when Game Over is active',
+      ui.getState() === UIState.GAME_OVER && !ui.levelCompleteContainer.visible);
+
+    // TEST T: Reset restores gameplay state and clears overlays
+    ui.reset();
+    assert('TEST T', 'Reset restores GAMEPLAY state and hides game over',
+      ui.getState() === UIState.GAMEPLAY && !ui.gameOverContainer.visible && ui.hudContainer.visible);
+
+    // TEST V: Single-screen constraint - Game Over cannot override Level Complete
+    const snapshotStats = {
+      score: 2500,
+      crystalsCollected: 20,
+      crystalsTotal: 20,
+      enemiesDefeated: 5,
+      enemiesTotal: 5,
+      healthRemaining: 3,
+      livesRemaining: 3
+    };
+    ui.showLevelComplete(snapshotStats);
+    ui.showGameOver(); // should be ignored
+    assert('TEST V', 'Game Over cannot override Level Complete',
+      ui.getState() === UIState.LEVEL_COMPLETE && ui.levelCompleteContainer.visible && !ui.gameOverContainer.visible);
+
+    // TEST X: Completion screen displays correct final statistics
+    assert('TEST X', 'Completion screen displays frozen snapshot statistics',
+      ui.completeStatsText.text.includes('FINAL SCORE:        002500') &&
+      ui.completeStatsText.text.includes('STAR CRYSTALS:      20 / 20') &&
+      ui.completeStatsText.text.includes('ENEMIES DEFEATED:   05 / 05') &&
+      ui.completeStatsText.text.includes('SHIELD REMAINING:   3 / 3') &&
+      ui.completeStatsText.text.includes('LIVES REMAINING:    3'));
+
+    // TEST AA: Reset clears level completion screen
+    ui.reset();
+    assert('TEST AA', 'Reset clears level completion screen and restores HUD',
+      ui.getState() === UIState.GAMEPLAY && !ui.levelCompleteContainer.visible && ui.hudContainer.visible);
+
+    // TEST AB: HUD remains camera-pinned (scrollFactor 0)
+    assert('TEST AB', 'HUD container has scrollFactor 0',
+      ui.hudContainer.scrollFactorX === 0 && ui.hudContainer.scrollFactorY === 0);
+
+    // TEST AC: HUD depth is set high
+    assert('TEST AC', 'HUD depth is set to 50 for overlay layering',
+      ui.hudContainer.depth === 50);
+
+    // Render results in DOM
+    const resultsDiv = document.getElementById('results');
+    const summaryDiv = document.getElementById('summary');
+    let passedCount = 0;
+
+    testResults.forEach(r => {
+      if (r.passed) passedCount++;
+      const row = document.createElement('div');
+      row.className = 'test-row';
+      row.innerHTML = `<span class="${r.passed ? 'pass' : 'fail'}">[${r.passed ? 'PASS' : 'FAIL'}]</span> ${r.id}: ${r.description}`;
+      resultsDiv.appendChild(row);
+    });
+
+    const allPassed = passedCount === testResults.length;
+    summaryDiv.innerHTML = `<span class="${allPassed ? 'pass' : 'fail'}">Stage 9 Tests: ${passedCount} / ${testResults.length} Passed</span>`;
+  </script>
+</body>
+</html>

@@ -1,0 +1,3 @@
+# Netlify Redirects
+# Fallback all undefined client-side routes to index.html with 200 rewrite
+/*    /index.html   200

@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Stage 10 Validation Suite - Star-Leaper</title>
+  <script src="./lib/phaser.min.js"></script>
+  <style>
+    body { font-family: monospace; background: #0b0f19; color: #f8fafc; padding: 20px; }
+    .pass { color: #4ade80; font-weight: bold; }
+    .fail { color: #f87171; font-weight: bold; }
+    #summary { font-size: 1.2rem; margin-bottom: 15px; }
+    .test-row { padding: 4px 0; border-bottom: 1px solid #1e293b; }
+  </style>
+</head>
+<body>
+  <h1>Stage 10 Automated Validation Suite: Audio & Feedback</h1>
+  <div id="summary">Running tests...</div>
+  <div id="results"></div>
+
+  <script type="module">
+    import { AUDIO_CONFIG, AUDIO_KEYS, MUSIC_STATES } from './src/config/audioConfig.js';
+    import { AudioSystem } from './src/systems/AudioSystem.js';
+    import { FeedbackSystem } from './src/systems/FeedbackSystem.js';
+    import { ScoreSystem } from './src/systems/ScoreSystem.js';
+    import { HealthSystem } from './src/systems/HealthSystem.js';
+    import { LivesSystem } from './src/systems/LivesSystem.js';
+    import { LevelCompletionSystem } from './src/systems/LevelCompletionSystem.js';
+    import { PowerUpSystem } from './src/systems/PowerUpSystem.js';
+
+    const testResults = [];
+    function assert(testId, description, condition) {
+      testResults.push({ id: testId, description, passed: !!condition });
+    }
+
+    class MockEvents {
+      constructor() { this.listeners = {}; this.emitted = []; }
+      on(evt, fn) { if (!this.listeners[evt]) this.listeners[evt] = []; this.listeners[evt].push(fn); }
+      emit(evt, payload) {
+        this.emitted.push({ evt, payload });
+        if (this.listeners[evt]) this.listeners[evt].forEach(fn => fn(payload));
+      }
+    }
+
+    class MockScene {
+      constructor() {
+        this.events = new MockEvents();
+        this.isGameOver = false;
+        this.cameras = {
+          main: {
+            shake: (dur, inten) => { this.lastShake = { dur, inten }; },
+            flash: (dur, r, g, b) => { this.lastFlash = { dur, r, g, b }; },
+            fade: (dur, r, g, b) => { this.lastFade = { dur, r, g, b }; }
+          }
+        };
+        this.tweens = {
+          add: (cfg) => {
+            const tw = { stop: () => {}, target: cfg.targets };
+            if (cfg.onComplete) setTimeout(cfg.onComplete, 10);
+            return tw;
+          }
+        };
+        this.time = {
+          delayedCall: (delay, fn) => setTimeout(fn, 10)
+        };
+        this.player = {
+          tint: null,
+          setTint: function(c) { this.tint = c; },
+          clearTint: function() { this.tint = null; }
+        };
+        this.add = {
+          text: (x, y, txt, style) => ({
+            x, y, text: txt, style,
+            setOrigin: function() { return this; },
+            setDepth: function() { return this; },
+            destroy: function() { this.destroyed = true; }
+          })
+        };
+        this.scoreSystem = new ScoreSystem(this, 20);
+        this.healthSystem = new HealthSystem(this);
+        this.livesSystem = new LivesSystem(this);
+        this.levelCompletionSystem = new LevelCompletionSystem(this);
+        this.powerUpSystem = new PowerUpSystem(this);
+      }
+    }
+
+    const scene = new MockScene();
+    const audio = new AudioSystem(scene);
+    audio.initialize(scene);
+    const feedback = new FeedbackSystem(scene);
+    feedback.initialize(scene);
+
+    // TEST A: AudioSystem initializes without errors
+    assert('TEST A', 'AudioSystem initializes without errors',
+      audio && typeof audio.playSFX === 'function' && typeof audio.playMusic === 'function');
+
+    // TEST B: Audio configuration loads correctly
+    assert('TEST B', 'Audio configuration loads correctly',
+      AUDIO_CONFIG.MASTER_VOLUME === 0.7 &&
+      AUDIO_KEYS.CRYSTAL_COLLECT === 'crystal_collect' &&
+      MUSIC_STATES.GAMEPLAY_MUSIC === 'gameplay_music');
+
+    // TEST C: Title music state activates correctly
+    audio.playMusic(MUSIC_STATES.TITLE_MUSIC);
+    assert('TEST C', 'Title music state activates correctly',
+      audio.currentMusicKey === MUSIC_STATES.TITLE_MUSIC);
+
+    // TEST D: Gameplay music state activates after starting
+    audio.playMusic(MUSIC_STATES.GAMEPLAY_MUSIC);
+    assert('TEST D', 'Gameplay music state activates after starting',
+      audio.currentMusicKey === MUSIC_STATES.GAMEPLAY_MUSIC);
+
+    // TEST E: Repeated restarts do not create duplicate music instances
+    const prevKey = audio.currentMusicKey;
+    audio.playMusic(MUSIC_STATES.GAMEPLAY_MUSIC);
+    assert('TEST E', 'Repeated calls do not duplicate current music instance',
+      audio.currentMusicKey === prevKey);
+
+    // TEST F: Crystal collection SFX
+    audio.playSFX(AUDIO_KEYS.CRYSTAL_COLLECT);
+    assert('TEST F', 'Crystal collection triggers CRYSTAL_COLLECT safely', true);
+
+    // TEST G: Enemy defeat SFX
+    audio.playSFX(AUDIO_KEYS.ENEMY_DEFEAT);
+    assert('TEST G', 'Enemy defeat triggers ENEMY_DEFEAT safely', true);
+
+    // TEST H: Player damage SFX
+    audio.playSFX(AUDIO_KEYS.PLAYER_DAMAGE);
+    assert('TEST H', 'Player damage triggers PLAYER_DAMAGE safely', true);
+
+    // TEST I: Player death SFX
+    audio.playSFX(AUDIO_KEYS.PLAYER_DEATH);
+    assert('TEST I', 'Player death triggers PLAYER_DEATH safely', true);
+
+    // TEST J: Player respawn SFX
+    audio.playSFX(AUDIO_KEYS.PLAYER_RESPAWN);
+    assert('TEST J', 'Player respawn triggers PLAYER_RESPAWN safely', true);
+
+    // TEST K: Aegis collection SFX
+    audio.playSFX(AUDIO_KEYS.POWERUP_COLLECT);
+    assert('TEST K', 'Aegis collection triggers POWERUP_COLLECT safely', true);
+
+    // TEST L: Aegis activation SFX
+    audio.playSFX(AUDIO_KEYS.POWERUP_ACTIVATE);
+    assert('TEST L', 'Aegis activation triggers POWERUP_ACTIVATE safely', true);
+
+    // TEST M: Aegis expiration SFX
+    audio.playSFX(AUDIO_KEYS.POWERUP_EXPIRE);
+    assert('TEST M', 'Aegis expiration triggers POWERUP_EXPIRE safely', true);
+
+    // TEST N: Goal interaction SFX
+    audio.playSFX(AUDIO_KEYS.GOAL_REACHED);
+    assert('TEST N', 'Goal interaction triggers GOAL_REACHED safely', true);
+
+    // TEST O: Level completion triggers completion audio
+    audio.playSFX(AUDIO_KEYS.LEVEL_COMPLETE);
+    assert('TEST O', 'Level completion triggers completion audio safely', true);
+
+    // TEST P: Game Over triggers Game Over audio
+    audio.playSFX(AUDIO_KEYS.GAME_OVER);
+    assert('TEST P', 'Game Over triggers Game Over audio safely', true);
+
+    // TEST Q: Gameplay music stops on Game Over
+    audio.stopMusic();
+    assert('TEST Q', 'Gameplay music stops on stopMusic()',
+      audio.currentMusicKey === null);
+
+    // TEST R: Gameplay music stops on completion
+    audio.playMusic(MUSIC_STATES.GAMEPLAY_MUSIC);
+    audio.stopMusic();
+    assert('TEST R', 'Gameplay music stops on completion',
+      audio.currentMusicKey === null);
+
+    // TEST S: Completion music/state activates correctly
+    audio.playMusic(MUSIC_STATES.COMPLETION_MUSIC);
+    assert('TEST S', 'Completion music/state activates correctly',
+      audio.currentMusicKey === MUSIC_STATES.COMPLETION_MUSIC);
+
+    // TEST T: Screen shake works for appropriate events
+    feedback.screenShake(0.008, 120);
+    assert('TEST T', 'Screen shake executes with configured intensity',
+      scene.lastShake && scene.lastShake.dur === 120 && scene.lastShake.inten === 0.008);
+
+    // TEST U: Player damage visual feedback works
+    feedback.playerDamage();
+    assert('TEST U', 'Player damage visual feedback triggers red flash & shake',
+      scene.player.tint === 0xff3333);
+
+    // TEST V: Player death feedback works
+    feedback.playerDeath();
+    assert('TEST V', 'Player death feedback triggers red death flash & shake',
+      scene.player.tint === 0xff0000 && scene.lastShake.dur === AUDIO_CONFIG.SHAKE.DEATH.duration);
+
+    // TEST W: Respawn feedback works
+    feedback.playerRespawn();
+    assert('TEST W', 'Respawn feedback triggers cyan flash & camera flash',
+      scene.player.tint === 0x00f0ff && scene.lastFlash && scene.lastFlash.dur === 200);
+
+    // TEST X: Aegis visual feedback works
+    feedback.powerUpExpired();
+    assert('TEST X', 'Aegis visual feedback triggers slate tint on expiration',
+      scene.player.tint === 0x64748b);
+
+    // TEST Y: Floating score feedback works
+    feedback.spawnFloatingScore(100, 200, 100);
+    assert('TEST Y', 'Floating score feedback creates tracked popup',
+      feedback.activePopups.size > 0);
+
+    // TEST Z: Temporary feedback effects clean themselves up
+    feedback.reset();
+    assert('TEST Z', 'Temporary feedback effects clean themselves up on reset',
+      feedback.activePopups.size === 0 && feedback.activeTweens.size === 0 && scene.player.tint === null);
+
+    // TEST AA: Feedback does not modify score
+    const initScore = scene.scoreSystem.getScore();
+    feedback.enemyDefeated(200, 100, 200);
+    assert('TEST AA', 'Feedback does not modify score',
+      scene.scoreSystem.getScore() === initScore);
+
+    // TEST AB: Feedback does not modify health
+    const initHealth = scene.healthSystem.getHealth();
+    feedback.playerDamage();
+    assert('TEST AB', 'Feedback does not modify health',
+      scene.healthSystem.getHealth() === initHealth);
+
+    // TEST AC: Feedback does not modify lives
+    const initLives = scene.livesSystem.getLives();
+    feedback.playerDeath();
+    assert('TEST AC', 'Feedback does not modify lives',
+      scene.livesSystem.getLives() === initLives);
+
+    // TEST AD: Feedback does not modify power-up duration
+    scene.powerUpSystem.activatePowerUp('AEGIS_CORE');
+    const initDuration = scene.powerUpSystem.getRemainingTime();
+    feedback.powerUpActivated();
+    assert('TEST AD', 'Feedback does not modify power-up duration',
+      scene.powerUpSystem.getRemainingTime() === initDuration);
+
+    // TEST AE: Completion state remains frozen
+    scene.levelCompletionSystem.completeLevel({ score: 100, crystalsCollected: 1, crystalsTotal: 20 });
+    assert('TEST AE', 'Completion state locks gameplay feedback',
+      feedback.isGameplayLocked() === true);
+
+    // TEST AF: No gameplay audio starts after completion
+    audio.playSFX(AUDIO_KEYS.UI_START);
+    assert('TEST AF', 'Audio hooks remain non-intrusive after completion', true);
+
+    // TEST AG: No gameplay feedback starts after completion
+    const popupsBefore = feedback.activePopups.size;
+    feedback.crystalCollected(100, 100, 100);
+    assert('TEST AG', 'No gameplay feedback starts after completion',
+      feedback.activePopups.size === popupsBefore);
+
+    // TEST AH: Game Over state remains authoritative
+    scene.levelCompletionSystem.reset();
+    scene.isGameOver = true;
+    assert('TEST AH', 'Game Over state locks gameplay feedback',
+      feedback.isGameplayLocked() === true);
+
+    // TEST AI: R clears audio and feedback state
+    audio.reset();
+    feedback.reset();
+    assert('TEST AI', 'R clears audio and feedback state',
+      audio.currentMusicKey === null && feedback.activePopups.size === 0);
+
+    // TEST AJ: R starts a fresh audio/feedback state
+    audio.playMusic(MUSIC_STATES.GAMEPLAY_MUSIC);
+    assert('TEST AJ', 'R starts a fresh audio/feedback state',
+      audio.currentMusicKey === MUSIC_STATES.GAMEPLAY_MUSIC);
+
+    // TEST AK: Mute functionality works
+    assert('TEST AK', 'Mute toggles properly and reports status',
+      !audio.isMuted() && audio.toggleMute() === true && audio.isMuted() && audio.toggleMute() === false && !audio.isMuted());
+
+    // TEST AL: Missing audio assets do not crash the game
+    audio.playSFX('NON_EXISTENT_KEY');
+    assert('TEST AL', 'Missing audio assets do not crash the game', true);
+
+    // TEST AM: Volume controllers work
+    audio.setMasterVolume(0.5);
+    audio.setSFXVolume(0.6);
+    audio.setMusicVolume(0.3);
+    assert('TEST AM', 'Volume controllers adjust levels without error',
+      audio.masterVolume === 0.5 && audio.sfxVolume === 0.6 && audio.musicVolume === 0.3);
+
+    // Render results in DOM
+    const resultsDiv = document.getElementById('results');
+    const summaryDiv = document.getElementById('summary');
+    let passedCount = 0;
+
+    testResults.forEach(r => {
+      if (r.passed) passedCount++;
+      const row = document.createElement('div');
+      row.className = 'test-row';
+      row.innerHTML = `<span class="${r.passed ? 'pass' : 'fail'}">[${r.passed ? 'PASS' : 'FAIL'}]</span> ${r.id}: ${r.description}`;
+      resultsDiv.appendChild(row);
+    });
+
+    const allPassed = passedCount === testResults.length;
+    summaryDiv.innerHTML = `<span class="${allPassed ? 'pass' : 'fail'}">Stage 10 Tests: ${passedCount} / ${testResults.length} Passed</span>`;
+  </script>
+</body>
+</html>

@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>starleaper.io — Star-Leaper: Orion Odyssey</title>
+  <link rel="canonical" href="http://starleaper.io/">
+  <meta name="description" content="Play Star-Leaper: Orion Odyssey at starleaper.io - Sci-fi platformer with deep progression, cosmic shop, perks, and companion pets.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=Press+Start+2P&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-gradient: radial-gradient(circle at center, #131429 0%, #080811 100%);
+      --panel-bg: rgba(18, 20, 38, 0.85);
+      --accent-cyan: #00f0ff;
+      --accent-magenta: #ff0077;
+      --accent-gold: #ffdd44;
+      --text-main: #e8ecf8;
+      --text-muted: #8892b0;
+      --border-glow: 0 0 25px rgba(0, 240, 255, 0.25);
+      --touch-scale: 1.0;
+      --touch-opacity: 0.38;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      background: var(--bg-gradient);
+      color: var(--text-main);
+      font-family: 'Outfit', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow-x: hidden;
+      padding: 16px;
+    }
+
+    .game-cabinet {
+      background: var(--panel-bg);
+      border: 2px solid rgba(0, 240, 255, 0.4);
+      border-radius: 16px;
+      box-shadow: var(--border-glow);
+      backdrop-filter: blur(12px);
+      padding: 18px 24px;
+      max-width: 860px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .game-header {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 12px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .title-badge {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .title-badge h1 {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 15px;
+      color: var(--accent-cyan);
+      text-shadow: 0 0 10px rgba(0, 240, 255, 0.6);
+      letter-spacing: 1px;
+    }
+
+    .domain-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 8px;
+      color: var(--accent-cyan);
+      background: rgba(0, 240, 255, 0.12);
+      border: 1px solid rgba(0, 240, 255, 0.45);
+      border-radius: 999px;
+      padding: 4px 10px;
+      text-decoration: none;
+      letter-spacing: 0.5px;
+      text-shadow: 0 0 8px rgba(0, 240, 255, 0.6);
+      transition: all 0.2s ease;
+    }
+
+    .domain-pill:hover {
+      background: rgba(0, 240, 255, 0.25);
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 12px rgba(0, 240, 255, 0.6);
+      transform: translateY(-1px);
+    }
+
+    .domain-footer-link {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 8px;
+      color: var(--accent-cyan);
+      opacity: 0.9;
+      text-decoration: none;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .header-btn {
+      background: rgba(0, 240, 255, 0.1);
+      border: 1px solid rgba(0, 240, 255, 0.4);
+      border-radius: 6px;
+      padding: 4px 10px;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 8px;
+      color: var(--accent-cyan);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .header-btn:hover {
+      background: rgba(0, 240, 255, 0.25);
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+    }
+
+    .stage-tag {
+      font-family: 'Outfit', sans-serif;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      background: linear-gradient(135deg, var(--accent-magenta), #7928ca);
+      color: #fff;
+      padding: 4px 10px;
+      border-radius: 999px;
+    }
+
+    #game-container {
+      width: 800px;
+      height: 450px;
+      background: #050711;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid rgba(0, 240, 255, 0.3);
+      box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8);
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #game-container:fullscreen,
+    #game-container:-webkit-full-screen {
+      width: 100vw !important;
+      height: 100vh !important;
+      border: none !important;
+      border-radius: 0 !important;
+      background: #000000 !important;
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+
+    #game-container canvas {
+      display: block;
+      margin: auto;
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
+
+    .controls-panel {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      color: var(--text-muted);
+      padding-top: 6px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .control-keys {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .key-badge {
+      display: inline-flex;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 6px;
+      padding: 2px 6px;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 8px;
+      color: var(--accent-gold);
+    }
+
+    .status-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: #34d399;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #34d399;
+      box-shadow: 0 0 8px #34d399;
+      animation: pulse 1.8s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.85); }
+    }
+
+    /* ==========================================================
+       VIRTUAL TOUCH GAMEPAD FOR MOBILE & TABLET DEVICES
+       ========================================================== */
+    .virtual-gamepad {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      padding: 20px 24px;
+      z-index: 50;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .virtual-gamepad.hidden {
+      display: none !important;
+    }
+
+    .touch-cluster {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      pointer-events: auto;
+    }
+
+    .touch-btn {
+      width: calc(66px * var(--touch-scale, 1));
+      height: calc(66px * var(--touch-scale, 1));
+      border-radius: 50%;
+      background: rgba(15, 23, 42, 0.22);
+      border: 1.5px solid rgba(0, 240, 255, 0.35);
+      box-shadow: 0 0 12px rgba(0, 240, 255, 0.18), inset 0 0 8px rgba(0, 240, 255, 0.08);
+      backdrop-filter: blur(2px);
+      color: rgba(0, 240, 255, 0.85);
+      font-family: 'Press Start 2P', monospace;
+      font-size: calc(20px * var(--touch-scale, 1));
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: none;
+      outline: none;
+      opacity: var(--touch-opacity, 0.38);
+      transition: transform 0.08s ease, background 0.08s ease, border-color 0.08s ease, box-shadow 0.08s ease, opacity 0.12s ease;
+    }
+
+    .touch-btn:active, .touch-btn.active {
+      opacity: 0.88;
+      background: rgba(0, 240, 255, 0.35);
+      border-color: #00f0ff;
+      transform: scale(0.92);
+      box-shadow: 0 0 25px rgba(0, 240, 255, 0.7), inset 0 0 16px rgba(0, 240, 255, 0.4);
+    }
+
+    .touch-btn.btn-jump {
+      width: calc(78px * var(--touch-scale, 1));
+      height: calc(78px * var(--touch-scale, 1));
+      background: rgba(25, 20, 35, 0.22);
+      border-color: rgba(255, 221, 68, 0.4);
+      color: rgba(255, 221, 68, 0.85);
+      box-shadow: 0 0 14px rgba(255, 221, 68, 0.2), inset 0 0 8px rgba(255, 221, 68, 0.08);
+    }
+
+    .touch-btn.btn-jump:active, .touch-btn.btn-jump.active {
+      opacity: 0.9;
+      background: rgba(255, 221, 68, 0.38);
+      border-color: #ffdd44;
+      box-shadow: 0 0 35px rgba(255, 221, 68, 0.8), inset 0 0 20px rgba(255, 221, 68, 0.5);
+    }
+
+    .touch-btn.btn-jump .jump-arrow {
+      font-size: calc(18px * var(--touch-scale, 1));
+      line-height: 1;
+    }
+
+    .touch-btn.btn-jump .jump-text {
+      font-size: calc(8px * var(--touch-scale, 1));
+      margin-top: calc(4px * var(--touch-scale, 1));
+      letter-spacing: 0.5px;
+    }
+
+    .top-actions-cluster {
+      position: absolute;
+      top: 10px;
+      right: 12px;
+      display: flex;
+      gap: 8px;
+      z-index: 25;
+      pointer-events: auto;
+    }
+
+    .btn-top-util {
+      width: calc(42px * var(--touch-scale, 1));
+      height: calc(32px * var(--touch-scale, 1));
+      border-radius: 8px;
+      font-size: calc(14px * var(--touch-scale, 1));
+      background: rgba(15, 23, 42, 0.45);
+      border: 1.5px solid rgba(0, 240, 255, 0.45);
+      color: #00f0ff;
+    }
+
+    .btn-top-util:active {
+      opacity: 0.92;
+      background: rgba(0, 240, 255, 0.4);
+      border-color: #00f0ff;
+      color: #ffffff;
+      transform: scale(0.95);
+    }
+
+    /* Mobile Info Modal */
+    .mobile-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(5, 7, 17, 0.85);
+      backdrop-filter: blur(10px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+      padding: 16px;
+    }
+
+    .mobile-modal.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .mobile-card {
+      background: rgba(18, 20, 38, 0.96);
+      border: 2px solid var(--accent-cyan);
+      box-shadow: 0 0 30px rgba(0, 240, 255, 0.4);
+      border-radius: 14px;
+      padding: 24px;
+      max-width: 520px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      position: relative;
+    }
+
+    .mobile-card h2 {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 13px;
+      color: var(--accent-cyan);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .mobile-url-box {
+      background: rgba(0, 240, 255, 0.08);
+      border: 1px solid rgba(0, 240, 255, 0.35);
+      border-radius: 8px;
+      padding: 12px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .mobile-url-box code {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 10px;
+      color: var(--accent-gold);
+      word-break: break-all;
+    }
+
+    .copy-btn {
+      background: rgba(0, 240, 255, 0.2);
+      border: 1px solid var(--accent-cyan);
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 8px;
+      color: #fff;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .copy-btn:hover {
+      background: var(--accent-cyan);
+      color: #000;
+    }
+
+    .mobile-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    .mobile-steps strong {
+      color: #e2e8f0;
+    }
+
+    .close-modal-btn {
+      align-self: flex-end;
+      background: #1e293b;
+      border: 1px solid #475569;
+      border-radius: 6px;
+      padding: 6px 14px;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 9px;
+      color: #94a3b8;
+      cursor: pointer;
+    }
+
+    .close-modal-btn:hover {
+      border-color: #ef4444;
+      color: #ef4444;
+    }
+
+    @media (max-width: 860px) {
+      body {
+        padding: 4px;
+      }
+      .game-cabinet {
+        padding: 8px;
+        border-radius: 10px;
+        gap: 8px;
+      }
+      .game-header {
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+      .title-badge h1 {
+        font-size: 12px;
+      }
+      .header-actions {
+        flex-wrap: wrap;
+        gap: 5px;
+      }
+      .header-btn {
+        padding: 5px 8px;
+        font-size: 8px;
+      }
+      #game-container {
+        width: 100%;
+        height: auto;
+        aspect-ratio: 16 / 9;
+      }
+      .touch-btn {
+        width: calc(54px * var(--touch-scale, 1));
+        height: calc(54px * var(--touch-scale, 1));
+        font-size: calc(15px * var(--touch-scale, 1));
+      }
+      .touch-btn.btn-jump {
+        width: calc(64px * var(--touch-scale, 1));
+        height: calc(64px * var(--touch-scale, 1));
+      }
+    }
+
+    /* Mobile Landscape Full-Bleed Immersion */
+    @media (max-height: 520px) {
+      body {
+        padding: 0;
+        margin: 0;
+        overflow: hidden;
+      }
+      .game-cabinet {
+        padding: 2px 6px;
+        border: none;
+        border-radius: 0;
+        background: #000000;
+        box-shadow: none;
+        width: 100vw;
+        height: 100vh;
+        gap: 2px;
+        justify-content: flex-start;
+      }
+      .game-header {
+        padding-bottom: 2px;
+        gap: 4px;
+        width: 100%;
+      }
+      .title-badge h1 {
+        font-size: 10px;
+      }
+      .domain-pill {
+        display: none;
+      }
+      .controls-panel {
+        display: none;
+      }
+      #game-container {
+        flex: 1;
+        width: 100%;
+        height: calc(100vh - 36px) !important;
+        max-height: calc(100vh - 36px);
+        aspect-ratio: 16 / 9;
+        margin: auto;
+      }
+    }
+
+    /* Game Preload & Splash Overlay */
+    .loading-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at center, #0e1225 0%, #05060f 100%);
+      z-index: 10;
+      pointer-events: auto;
+      border-radius: 8px;
+    }
+    .quantum-spinner {
+      width: 46px;
+      height: 46px;
+      border: 3.5px solid rgba(0, 240, 255, 0.15);
+      border-top-color: var(--accent-cyan);
+      border-right-color: var(--accent-magenta);
+      border-radius: 50%;
+      animation: quantumSpin 0.75s linear infinite;
+      margin-bottom: 16px;
+      box-shadow: 0 0 25px rgba(0, 240, 255, 0.35);
+    }
+    @keyframes quantumSpin {
+      to { transform: rotate(360deg); }
+    }
+    .loading-title {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 11px;
+      color: var(--accent-cyan);
+      letter-spacing: 1.5px;
+      margin-bottom: 8px;
+      text-shadow: 0 0 10px rgba(0, 240, 255, 0.6);
+    }
+    .loading-subtitle {
+      font-size: 12px;
+      color: var(--text-muted);
+      letter-spacing: 0.5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="game-cabinet">
+    <div class="game-header">
+      <div class="title-badge">
+        <span class="status-dot"></span>
+        <h1>STAR-LEAPER: ORION ODYSSEY</h1>
+        <a class="domain-pill" href="https://starleaper.netlify.app/" target="_blank" title="Live Worldwide Web App (Open on Netlify)">🌐 starleaper.io ➔ LIVE</a>
+      </div>
+      <div class="header-actions">
+        <button id="touch-toggle-btn" class="header-btn" onclick="window.toggleTouchControls()">🎮 TOUCH</button>
+        <button id="touch-size-btn" class="header-btn" onclick="window.cycleTouchButtonScale()" title="Cycle button size (75%, 100%, 125%, 150%)">🎛️ SIZE: 100%</button>
+        <button id="mobile-guide-btn" class="header-btn" onclick="window.toggleMobileModal()">📱 MOBILE</button>
+        <button id="scoreboard-btn" class="header-btn" onclick="if (window.game && window.game.scene) { const gs = window.game.scene.getScene('GameScene'); if (gs && gs.uiSystem) gs.uiSystem.showScoreboard(); }" style="border-color: #facc15; color: #facc15;">🏆 SCORES [B]</button>
+        <button id="cheats-btn" class="header-btn" onclick="if (window.game && window.game.scene) { const gs = window.game.scene.getScene('GameScene'); if (gs && gs.uiSystem) gs.uiSystem.showCheatTerminal(); }" title="Cheat Codes Terminal (C)" style="border-color: #c084fc; color: #c084fc;">★ CHEATS</button>
+        <button id="settings-btn" class="header-btn" onclick="if (window.game && window.game.scene) { const gs = window.game.scene.getScene('GameScene'); if (gs && gs.uiSystem) gs.uiSystem.showSettings(); }">⚙ SETTINGS</button>
+        <button id="pause-btn" class="header-btn" onclick="if (window.game && window.game.scene) { const gs = window.game.scene.getScene('GameScene'); if (gs && gs.togglePause) gs.togglePause(); }">⏸ PAUSE [ESC]</button>
+        <button id="fullscreen-btn" class="header-btn" onclick="window.toggleGameFullscreen()">⛶ FULLSCREEN</button>
+        <span class="stage-tag">Major Expansion</span>
+      </div>
+    </div>
+
+    <div id="game-container">
+      <!-- Loading Indicator / Splash -->
+      <div id="game-loading-indicator" class="loading-overlay">
+        <div class="quantum-spinner"></div>
+        <div class="loading-title">INITIALIZING QUANTUM CORE</div>
+        <div class="loading-subtitle">Calibrating Orion Odyssey...</div>
+      </div>
+
+      <!-- On-Screen Virtual Touch Gamepad for Mobile & Touchscreens -->
+      <div id="virtual-gamepad" class="virtual-gamepad">
+        <div class="touch-cluster top-actions-cluster">
+          <button id="btn-touch-cheats" class="touch-btn btn-top-util" aria-label="Cheats" onclick="if (window.game && window.game.scene) { const gs = window.game.scene.getScene('GameScene'); if (gs && gs.uiSystem) gs.uiSystem.showCheatTerminal(); }" style="color: #c084fc; border-color: rgba(192, 132, 252, 0.4);">★</button>
+          <button id="btn-touch-settings" class="touch-btn btn-top-util" aria-label="Settings" onclick="if (window.game && window.game.scene) { const gs = window.game.scene.getScene('GameScene'); if (gs && gs.uiSystem) gs.uiSystem.showSettings(); }">⚙</button>
+          <button id="btn-touch-pause" class="touch-btn btn-top-util" aria-label="Pause" onclick="if (window.game && window.game.scene) { const gs = window.game.scene.getScene('GameScene'); if (gs && gs.togglePause) gs.togglePause(); }">⏸</button>
+        </div>
+        <div class="touch-cluster dpad-cluster">
+          <button id="btn-touch-left" class="touch-btn" aria-label="Move Left">◀</button>
+          <button id="btn-touch-right" class="touch-btn" aria-label="Move Right">▶</button>
+        </div>
+        <div class="touch-cluster action-cluster">
+          <button id="btn-touch-attack" class="touch-btn btn-attack" aria-label="Attack with Weapon" style="border-color: #ef4444; color: #ef4444; margin-right: 6px;">
+            <span style="font-size: 15px;">⚔️</span>
+            <span style="font-size: 7px; font-family: 'Press Start 2P', monospace;">FIRE</span>
+          </button>
+          <button id="btn-touch-jump" class="touch-btn btn-jump" aria-label="Jump & Double Jump">
+            <span class="jump-arrow">▲</span>
+            <span class="jump-text">JUMP</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="controls-panel">
+      <div class="control-keys">
+        <span>Start: <span class="key-badge">ENTER</span></span>
+        <span>Move: <span class="key-badge">A</span> <span class="key-badge">D</span></span>
+        <span>Jump: <span class="key-badge">W</span> / <span class="key-badge">SPACE</span></span>
+        <span>Attack: <span class="key-badge">F</span></span>
+        <span>Scores: <span class="key-badge">B</span></span>
+        <span>Pause: <span class="key-badge">ESC</span></span>
+        <span>Cheats: <span class="key-badge">C</span></span>
+        <span>Restart: <span class="key-badge">R</span></span>
+        <span>Mute: <span class="key-badge">M</span></span>
+      </div>
+      <div class="status-badge">
+        <a class="domain-footer-link" href="http://starleaper.io/" target="_blank">starleaper.io</a>
+        <span style="opacity: 0.4;">•</span>
+        <span>Arcade Physics Active</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile Play Guide Modal -->
+  <div id="mobile-modal" class="mobile-modal" onclick="if(event.target === this) window.toggleMobileModal(false)">
+    <div class="mobile-card" style="max-width: 530px;">
+      <h2>📱 PLAY ON PHONE & SHARE LINK</h2>
+      <p style="color: #94a3b8; font-size: 13px;">Play Star-Leaper on any iPhone, iPad, Android phone, or share worldwide with strangers & friends!</p>
+      
+      <!-- Section 1: Worldwide Public Link for Strangers -->
+      <div style="background: rgba(34, 197, 94, 0.08); border: 1.5px solid rgba(34, 197, 94, 0.4); border-radius: 8px; padding: 12px; margin-bottom: 12px; text-align: left;">
+        <div style="font-size: 11px; font-weight: 700; color: #4ade80; display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+          <span>🌍 PUBLIC WORLDWIDE LINK</span>
+          <span style="font-size: 9px; background: rgba(34, 197, 94, 0.25); color: #86efac; padding: 2px 6px; border-radius: 4px; font-weight: 800;">FOR STRANGERS & FRIENDS</span>
+        </div>
+        <div class="mobile-url-box" style="margin: 0; background: rgba(0,0,0,0.55); border-color: rgba(34, 197, 94, 0.5);">
+          <code id="public-url-display" style="color: #86efac; font-size: 12px;">https://starleaper.netlify.app/</code>
+          <button class="copy-btn copy-btn-public" onclick="window.copyPublicUrl()" style="background: #15803d; border-color: #22c55e;">📋 COPY FOR STRANGERS</button>
+        </div>
+        <p style="font-size: 11px; color: #bbf7d0; margin: 6px 0 0 0; line-height: 1.4;">
+          ✓ Anyone in any country on cellular data (4G/5G) or Wi-Fi can open this link directly!
+        </p>
+      </div>
+
+      <!-- Section 2: Local Network Link -->
+      <div style="background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.35); border-radius: 8px; padding: 10px 12px; margin-bottom: 12px; text-align: left;">
+        <div style="font-size: 10px; font-weight: 700; color: #fbbf24; margin-bottom: 4px;">
+          🏠 LOCAL NETWORK LINK (ONLY FOR DEVICES ON YOUR HOME WI-FI)
+        </div>
+        <div class="mobile-url-box" style="margin: 0; background: rgba(0,0,0,0.45); border-color: rgba(245, 158, 11, 0.4);">
+          <code id="mobile-url-display" style="color: #fcd34d; font-size: 11px;">http://172.16.1.128:8080/</code>
+          <button class="copy-btn" onclick="window.copyMobileUrl()">📋 COPY LOCAL</button>
+        </div>
+        <p style="font-size: 10px; color: #fde68a; margin: 4px 0 0 0; line-height: 1.3;">
+          ⚠️ <em>Notice:</em> Strangers outside your home Wi-Fi CANNOT open this IP address. Send them the Public Worldwide Link above!
+        </p>
+      </div>
+
+      <div class="mobile-steps">
+        <div><strong>1. Open Anywhere:</strong> Send the green link to strangers or friends to play instantly without installing anything.</div>
+        <div><strong>2. Full-Screen Web App (PWA):</strong>
+          <br>• <em>iPhone/iPad</em>: Tap Share (square with arrow) → <strong>"Add to Home Screen"</strong>.
+          <br>• <em>Android</em>: Tap ⋮ Menu → <strong>"Install App"</strong> or <strong>"Add to Home screen"</strong>.
+        </div>
+        <div><strong>3. Rotate to Landscape:</strong> Use the on-screen glowing D-Pad and Jump buttons for fluid arcade platforming!</div>
+      </div>
+
+      <div class="mobile-size-row" style="display: flex; align-items: center; justify-content: space-between; background: rgba(0, 240, 255, 0.06); padding: 10px 14px; border-radius: 8px; border: 1px solid rgba(0, 240, 255, 0.25); margin-top: 4px;">
+        <span style="font-size: 11px; font-weight: 600; color: var(--accent-cyan);">BUTTON SIZE:</span>
+        <div style="display: flex; gap: 6px;">
+          <button class="copy-btn btn-scale-opt" data-scale="0.75" onclick="window.setTouchButtonScale(0.75)">75%</button>
+          <button class="copy-btn btn-scale-opt" data-scale="1.0" onclick="window.setTouchButtonScale(1.0)">100%</button>
+          <button class="copy-btn btn-scale-opt" data-scale="1.25" onclick="window.setTouchButtonScale(1.25)">125%</button>
+          <button class="copy-btn btn-scale-opt" data-scale="1.5" onclick="window.setTouchButtonScale(1.5)">150%</button>
+        </div>
+      </div>
+
+      <button class="close-modal-btn" onclick="window.toggleMobileModal(false)">CLOSE [X]</button>
+    </div>
+  </div>
+
+  <script>
+    // --- Touch Button Sizing Engine ---
+    const TOUCH_SCALE_PRESETS = [0.75, 1.0, 1.25, 1.5];
+    let currentTouchScale = parseFloat(localStorage.getItem('starleaper_touch_scale')) || 1.0;
+
+    window.getTouchButtonScale = function() {
+      return currentTouchScale;
+    };
+
+    window.setTouchButtonScale = function(scale) {
+      currentTouchScale = Math.min(1.5, Math.max(0.7, parseFloat(scale) || 1.0));
+      document.documentElement.style.setProperty('--touch-scale', currentTouchScale.toString());
+      try {
+        localStorage.setItem('starleaper_touch_scale', currentTouchScale.toString());
+      } catch (e) {}
+
+      const sizeBtn = document.getElementById('touch-size-btn');
+      if (sizeBtn) {
+        sizeBtn.textContent = `🎛️ SIZE: ${Math.round(currentTouchScale * 100)}%`;
+      }
+
+      document.querySelectorAll('.btn-scale-opt').forEach(b => {
+        const s = parseFloat(b.dataset.scale);
+        b.style.background = Math.abs(s - currentTouchScale) < 0.05 ? 'var(--accent-cyan)' : 'rgba(0, 240, 255, 0.2)';
+        b.style.color = Math.abs(s - currentTouchScale) < 0.05 ? '#000' : '#fff';
+      });
+
+      // Dispatch event for in-game settings synchronisation
+      window.dispatchEvent(new CustomEvent('starleaper_touch_scale_changed', { detail: { scale: currentTouchScale } }));
+    };
+
+    window.cycleTouchButtonScale = function() {
+      const idx = TOUCH_SCALE_PRESETS.findIndex(s => Math.abs(s - currentTouchScale) < 0.05);
+      const nextIdx = (idx + 1) % TOUCH_SCALE_PRESETS.length;
+      window.setTouchButtonScale(TOUCH_SCALE_PRESETS[nextIdx]);
+    };
+
+    // Apply saved scale on startup
+    window.setTouchButtonScale(currentTouchScale);
+
+    // --- Fullscreen Engine ---
+    window.toggleGameFullscreen = function() {
+      const container = document.getElementById('game-container');
+      if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+        if (container.requestFullscreen) {
+          container.requestFullscreen().catch(() => {
+            if (window.game && window.game.scale) window.game.scale.startFullscreen();
+          });
+        } else if (container.webkitRequestFullscreen) {
+          container.webkitRequestFullscreen();
+        } else if (window.game && window.game.scale) {
+          window.game.scale.startFullscreen();
+        }
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) {
+          document.webkitExitFullscreen();
+        }
+      }
+    };
+
+    function updateFullscreenStatus() {
+      const btn = document.getElementById('fullscreen-btn');
+      if (btn) {
+        btn.textContent = (document.fullscreenElement || document.webkitFullscreenElement) ? '🗗 WINDOWED [F]' : '⛶ FULLSCREEN [F]';
+      }
+    }
+    document.addEventListener('fullscreenchange', updateFullscreenStatus);
+    document.addEventListener('webkitfullscreenchange', updateFullscreenStatus);
+
+    window.addEventListener('keydown', (e) => {
+      if ((e.key === 'f' || e.key === 'F') && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+        window.toggleGameFullscreen();
+      }
+    });
+
+    // --- Virtual Touch Controls Engine ---
+    const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (window.innerWidth < 860);
+    const gamepad = document.getElementById('virtual-gamepad');
+    let touchControlsActive = isTouchDevice;
+
+    window.toggleTouchControls = function(force) {
+      if (typeof force === 'boolean') {
+        touchControlsActive = force;
+      } else {
+        touchControlsActive = !touchControlsActive;
+      }
+      if (gamepad) {
+        gamepad.classList.toggle('hidden', !touchControlsActive);
+      }
+      const btn = document.getElementById('touch-toggle-btn');
+      if (btn) {
+        btn.style.color = touchControlsActive ? '#00f0ff' : '#64748b';
+        btn.style.borderColor = touchControlsActive ? '#00f0ff' : 'rgba(0, 240, 255, 0.2)';
+      }
+    };
+
+    // Auto-initialize touch gamepad state
+    window.toggleTouchControls(touchControlsActive);
+
+    // --- Wire Virtual Touch Buttons ---
+    function bindTouchBtn(elementId, onStart, onEnd) {
+      const el = document.getElementById(elementId);
+      if (!el) return;
+
+      const handleStart = (e) => {
+        if (e.cancelable) e.preventDefault();
+        el.classList.add('active');
+        onStart();
+      };
+
+      const handleEnd = (e) => {
+        if (e.cancelable) e.preventDefault();
+        el.classList.remove('active');
+        onEnd();
+      };
+
+      el.addEventListener('pointerdown', handleStart, { passive: false });
+      el.addEventListener('pointerup', handleEnd, { passive: false });
+      el.addEventListener('pointercancel', handleEnd, { passive: false });
+      el.addEventListener('pointerleave', handleEnd, { passive: false });
+    }
+
+    bindTouchBtn('btn-touch-left',
+      () => { if (window.__STARLEAPER_TOUCH__) window.__STARLEAPER_TOUCH__.left = true; },
+      () => { if (window.__STARLEAPER_TOUCH__) window.__STARLEAPER_TOUCH__.left = false; }
+    );
+
+    bindTouchBtn('btn-touch-right',
+      () => { if (window.__STARLEAPER_TOUCH__) window.__STARLEAPER_TOUCH__.right = true; },
+      () => { if (window.__STARLEAPER_TOUCH__) window.__STARLEAPER_TOUCH__.right = false; }
+    );
+
+    bindTouchBtn('btn-touch-jump',
+      () => {
+        if (window.__STARLEAPER_TOUCH__) {
+          window.__STARLEAPER_TOUCH__.jump = true;
+          window.__STARLEAPER_TOUCH__.jumpJustPressed = true;
+        }
+        // Dismiss start/complete/game over overlay if present on touch devices
+        const gs = window.game && window.game.scene && (window.game.scene.getScene ? window.game.scene.getScene('GameScene') : (window.game.scene.keys && window.game.scene.keys.GameScene));
+        if (gs && gs.handleStartInput) {
+          if ((gs.uiSystem && (gs.uiSystem.isTitleActive() || gs.uiSystem.isLevelCompleteActive())) || gs.isGameOver) {
+            gs.handleStartInput();
+          }
+        }
+      },
+      () => {
+        if (window.__STARLEAPER_TOUCH__) {
+          window.__STARLEAPER_TOUCH__.jump = false;
+          window.__STARLEAPER_TOUCH__.jumpJustReleased = true;
+        }
+      }
+    );
+
+    bindTouchBtn('btn-touch-attack',
+      () => {
+        if (window.__STARLEAPER_TOUCH__) {
+          window.__STARLEAPER_TOUCH__.attack = true;
+          window.__STARLEAPER_TOUCH__.attackJustPressed = true;
+        }
+        const gs = window.game && window.game.scene && (window.game.scene.getScene ? window.game.scene.getScene('GameScene') : (window.game.scene.keys && window.game.scene.keys.GameScene));
+        if (gs && typeof gs.handlePlayerAttack === 'function') {
+          gs.handlePlayerAttack();
+        }
+      },
+      () => {
+        if (window.__STARLEAPER_TOUCH__) {
+          window.__STARLEAPER_TOUCH__.attack = false;
+        }
+      }
+    );
+
+    // --- Mobile Modal Dialog ---
+    window.toggleMobileModal = function(show) {
+      const modal = document.getElementById('mobile-modal');
+      if (!modal) return;
+      const isVisible = modal.classList.contains('visible');
+      const targetState = (typeof show === 'boolean') ? show : !isVisible;
+      modal.classList.toggle('visible', targetState);
+
+      // Update display URL dynamically
+      if (targetState) {
+        const publicDisplay = document.getElementById('public-url-display');
+        const isPublicHost = window.location.hostname && !window.location.hostname.includes('127.0.0.1') && !window.location.hostname.includes('localhost') && !window.location.hostname.startsWith('172.');
+        const publicUrl = isPublicHost ? `${window.location.protocol}//${window.location.host}/` : 'https://starleaper.netlify.app/';
+        if (publicDisplay) {
+          publicDisplay.textContent = publicUrl;
+        }
+
+        const urlDisplay = document.getElementById('mobile-url-display');
+        const host = window.location.hostname || '172.16.1.128';
+        const port = window.location.port ? `:${window.location.port}` : '';
+        const protocol = window.location.protocol || 'http:';
+        if (urlDisplay) {
+          urlDisplay.textContent = `${protocol}//${host}${port}/`;
+        }
+      }
+    };
+
+    window.copyPublicUrl = function() {
+      const publicDisplay = document.getElementById('public-url-display');
+      const url = (publicDisplay && publicDisplay.textContent) ? publicDisplay.textContent : 'https://starleaper.netlify.app/';
+      navigator.clipboard.writeText(url).then(() => {
+        const copyBtn = document.querySelector('.copy-btn-public');
+        if (copyBtn) {
+          copyBtn.textContent = '✓ COPIED FOR STRANGERS!';
+          setTimeout(() => { copyBtn.textContent = '📋 COPY FOR STRANGERS'; }, 2500);
+        }
+      }).catch(() => {
+        window.prompt ? window.prompt('Copy public link for strangers / friends:', url) : alert('URL: ' + url);
+      });
+    };
+
+    window.copyMobileUrl = function() {
+      const urlDisplay = document.getElementById('mobile-url-display');
+      if (!urlDisplay) return;
+      navigator.clipboard.writeText(urlDisplay.textContent).then(() => {
+        const copyBtn = document.querySelector('#mobile-modal .copy-btn:not(.copy-btn-public)');
+        if (copyBtn) {
+          copyBtn.textContent = '✓ COPIED LOCAL!';
+          setTimeout(() => { copyBtn.textContent = '📋 COPY LOCAL'; }, 2000);
+        }
+      }).catch(() => {
+        alert('URL: ' + urlDisplay.textContent);
+      });
+    };
+  </script>
+
+  <!-- Phaser Engine Library (Cloudflare Global CDN with dynamic local fallback) -->
+  <script id="phaser-cdn-script" src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.80.1/phaser.min.js"></script>
+  <script>
+    (function() {
+      function loadLocalPhaser() {
+        if (typeof Phaser !== 'undefined') return;
+        console.warn('[Star-Leaper] Loading local lib/phaser.min.js fallback...');
+        var s = document.createElement('script');
+        s.src = 'lib/phaser.min.js';
+        document.head.appendChild(s);
+      }
+
+      var cdn = document.getElementById('phaser-cdn-script');
+      if (cdn) {
+        cdn.onerror = loadLocalPhaser;
+      }
+      setTimeout(function() {
+        if (typeof Phaser === 'undefined') {
+          loadLocalPhaser();
+        }
+      }, 2000);
+
+      function bootApp() {
+        if (typeof Phaser !== 'undefined' && Phaser.Game) {
+          import('./src/main.js').catch(function(err) {
+            console.error('[Star-Leaper] Module bootstrap error:', err);
+            var loader = document.getElementById('game-loading-indicator');
+            if (loader) {
+              loader.innerHTML = '<div style="color:#ff3366;font-family:monospace;font-size:12px;padding:20px;text-align:center;">' +
+                'ENGINE LOAD ERROR<br><span style="font-size:10px;color:#8892b0;">' + (err.message || err) + '</span><br><br>' +
+                '<button onclick="location.reload()" style="background:#00f0ff;color:#000;border:none;padding:8px 18px;border-radius:6px;font-weight:bold;cursor:pointer;">TAP TO RELOAD</button></div>';
+            }
+          });
+        } else {
+          setTimeout(bootApp, 40);
+        }
+      }
+      bootApp();
+    })();
+  </script>
+</body>
+</html>

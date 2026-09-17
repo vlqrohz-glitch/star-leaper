@@ -1,0 +1,17 @@
+# Temporary build & deploy artifacts
+dist_netlify/
+*.zip
+
+# Test screenshots and screen captures
+*.png
+*.webp
+
+# Chrome temporary test profiles
+chrome_debug*
+chrome_scr_*
+
+# Operating System & Editor caches
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
