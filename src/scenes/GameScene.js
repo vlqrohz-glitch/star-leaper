@@ -25,6 +25,7 @@ import { LevelCompletionSystem } from '../systems/LevelCompletionSystem.js';
 import { PowerUpSystem } from '../systems/PowerUpSystem.js';
 import { PlayerBullet } from '../entities/PlayerBullet.js';
 import { WeaponPickup } from '../entities/WeaponPickup.js';
+import { Boss } from '../entities/Boss.js';
 import { ScoreboardSystem } from '../systems/ScoreboardSystem.js';
 import { CheatSystem } from '../systems/CheatSystem.js';
 import { UISystem } from '../systems/UISystem.js';
@@ -41,8 +42,8 @@ import { POWERUP_CONFIG, PowerUpState, PowerUpType } from '../config/powerUpConf
 
 /**
  * Main Game Scene - Star-Leaper: Orion Odyssey
- * Supports dynamic sector loading (Levels 1–5), 4 playable operatives,
- * 5-layer parallax engine, advanced hazards, moving/falling platforms, and pause menu.
+ * Supports dynamic sector loading (Levels 1–6, 10 sublevels each with Final Bosses),
+ * 4 playable operatives, 5-layer parallax engine, advanced hazards, moving/falling platforms, and pause menu.
  */
 export class GameScene extends Phaser.Scene {
   constructor() {
@@ -51,8 +52,11 @@ export class GameScene extends Phaser.Scene {
 
   init(data) {
     this.levelIndex = (data && data.levelIndex) ? data.levelIndex : 1;
+    this.subLevel = (data && data.subLevel) ? data.subLevel : 1;
     this.characterId = (data && data.characterId) ? data.characterId : 'NOVA';
-    this.levelData = getLevelData(this.levelIndex) || LEVEL_1_DATA;
+    this.levelData = getLevelData(this.levelIndex, this.subLevel) || LEVEL_1_DATA;
+    this.nearbyWeaponPickup = null;
+    this.boss = null;
   }
 
   create() {
@@ -198,7 +202,7 @@ export class GameScene extends Phaser.Scene {
 
     this.weaponPickups = this.physics.add.group();
     this.physics.add.overlap(this.player, this.weaponPickups, (player, pickup) => {
-      this.handleWeaponPickup(player, pickup);
+      this.nearbyWeaponPickup = pickup;
     });
     this.createWeaponPickup();
 
@@ -220,9 +224,11 @@ export class GameScene extends Phaser.Scene {
     this.restartKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R);
     this.restartKey.on('down', () => this.restartLevel());
 
-    // 12. Weapon Attack Key ('F')
+    // 12. Weapon Attack / Use / Collect Keys ('E' primary, 'F' secondary)
+    this.useKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E);
+    this.useKey.on('down', () => this.handleUseOrAttackKey());
     this.attackKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.F);
-    this.attackKey.on('down', () => this.handlePlayerAttack());
+    this.attackKey.on('down', () => this.handleUseOrAttackKey());
 
     // Scoreboard Shortcut Key ('B')
     this.scoreboardKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.B);
@@ -321,11 +327,18 @@ export class GameScene extends Phaser.Scene {
       return;
     }
 
-    // If Level Complete, advance to next sector
+    // If Level Complete, advance to next sublevel or next sector
     if (this.levelCompletionSystem && this.levelCompletionSystem.isLevelComplete()) {
-      if (this.levelIndex < 6) {
+      if (this.subLevel < 10) {
+        this.scene.restart({
+          levelIndex: this.levelIndex,
+          subLevel: this.subLevel + 1,
+          characterId: this.characterId
+        });
+      } else if (this.levelIndex < 6) {
         this.scene.restart({
           levelIndex: this.levelIndex + 1,
+          subLevel: 1,
           characterId: this.characterId
         });
       } else {
@@ -438,6 +451,13 @@ export class GameScene extends Phaser.Scene {
       fontSize: '8px',
       color: '#00f0ff'
     }).setOrigin(0.5);
+
+    // If boss level, hide and disable goal beacon until boss is defeated
+    if (this.levelData.goal && this.levelData.goal.initiallyHidden) {
+      this.goal.setVisible(false);
+      if (this.goal.body) this.goal.body.enable = false;
+      this.goalLabel.setVisible(false);
+    }
   }
 
   createCollectibles() {
@@ -477,6 +497,24 @@ export class GameScene extends Phaser.Scene {
         }
         this.enemies.add(enemy);
       }
+    }
+
+    // Spawn Boss if Level Data defines a Final Boss
+    if (this.levelData.boss) {
+      const bInfo = this.levelData.boss;
+      this.boss = new Boss(this, bInfo.x, bInfo.y, bInfo.sectorIndex || this.levelIndex);
+      this.physics.add.collider(this.boss, this.platforms);
+      if (this.movingPlatforms) {
+        this.physics.add.collider(this.boss, this.movingPlatforms);
+      }
+      this.physics.add.collider(this.player, this.boss, (player, boss) => {
+        this.handlePlayerBossCollision(player, boss);
+      });
+      this.physics.add.overlap(this.playerProjectiles, this.boss, (bullet, boss) => {
+        this.handleBulletBossHit(bullet, boss);
+      });
+    } else {
+      this.boss = null;
     }
   }
 
@@ -563,10 +601,17 @@ export class GameScene extends Phaser.Scene {
     const isStomp = (player.body.velocity.y > 0) && (player.y + player.height / 2 <= enemy.y + ENEMY_CONFIG.STOMP_OFFSET_THRESHOLD);
 
     if (isStomp) {
-      enemy.defeat();
+      if (typeof enemy.takeDamage === 'function') {
+        enemy.takeDamage(30);
+      } else {
+        enemy.defeat();
+      }
       player.bounceAfterStomp(ENEMY_CONFIG.STOMP_BOUNCE_FORCE);
     } else {
-      player.handleEnemyHit(enemy);
+      const hit = player.handleEnemyHit(enemy);
+      if (hit && this.healthSystem) {
+        this.healthSystem.takeDamage(HEALTH_CONFIG.DAMAGE_PER_HIT, 'enemy');
+      }
     }
   }
 
@@ -587,9 +632,82 @@ export class GameScene extends Phaser.Scene {
       return;
     }
 
-    player.handleEnemyHit(proj);
+    const hit = player.handleEnemyHit(proj);
+    if (hit && this.healthSystem) {
+      this.healthSystem.takeDamage(HEALTH_CONFIG.DAMAGE_PER_HIT, 'projectile');
+    }
     if (proj.explode) proj.explode(true);
     else proj.destroy();
+  }
+
+  handlePlayerBossCollision(player, boss) {
+    if (
+      this.uiSystem.isTitleActive() ||
+      this.isGameOver ||
+      this.levelCompletionSystem.isLevelComplete() ||
+      player.lifeState !== LifeState.ALIVE ||
+      boss.state === 'DEFEATED'
+    ) {
+      return;
+    }
+
+    // Aegis shield blocks damage
+    if (this.powerUpSystem && this.powerUpSystem.isPowerUpActive('AEGIS_CORE')) {
+      this.handleDamagePrevented();
+      const dir = (player.x < boss.x) ? -1 : 1;
+      player.setVelocityX(dir * 150);
+      return;
+    }
+
+    // Check stomp from above
+    const isFalling = player.body.velocity.y > 0;
+    const playerBottom = player.y + (player.height / 2);
+    const bossTop = boss.y - (boss.height / 2);
+
+    if (isFalling && (playerBottom <= bossTop + 14)) {
+      player.bounceAfterStomp(ENEMY_CONFIG.STOMP_BOUNCE_FORCE || -280);
+      boss.takeDamage(25);
+      if (this.cameras && this.cameras.main) {
+        this.cameras.main.shake(120, 0.008);
+      }
+      return;
+    }
+
+    // Side hit: 5 HP damage to player
+    const hit = player.handleEnemyHit(boss);
+    if (hit && this.healthSystem) {
+      this.healthSystem.takeDamage(HEALTH_CONFIG.DAMAGE_PER_HIT, 'boss');
+    }
+  }
+
+  handleBulletBossHit(bullet, boss) {
+    if (!bullet || !boss || boss.state === 'DEFEATED' || !bullet.active) return;
+    const dmg = bullet.damage || 10;
+    boss.takeDamage(dmg);
+    if (bullet.explode) {
+      bullet.explode(true);
+    } else {
+      bullet.destroy();
+    }
+  }
+
+  activateBossGoal() {
+    if (this.goal) {
+      this.goal.setVisible(true);
+      if (this.goal.body) this.goal.body.enable = true;
+      if (this.goalLabel) this.goalLabel.setVisible(true);
+      if (this.cameras && this.cameras.main) {
+        this.cameras.main.flash(350, 0, 240, 255);
+      }
+      const ring = this.add.circle(this.goal.x, this.goal.y, 40, 0x00f0ff, 0.8);
+      this.tweens.add({
+        targets: ring,
+        scale: 2.5,
+        alpha: 0,
+        duration: 600,
+        onComplete: () => ring.destroy()
+      });
+    }
   }
 
   handleGoalReached() {
@@ -721,6 +839,10 @@ export class GameScene extends Phaser.Scene {
       this.weaponPickups.clear(true, true);
       this.createWeaponPickup();
     }
+    this.nearbyWeaponPickup = null;
+    if (this.boss && this.levelData.boss) {
+      this.boss.reset(this.levelData.boss.x, this.levelData.boss.y);
+    }
 
     // Reset Player & Companion Pet
     this.player.reset(this.levelData.spawn.x, this.levelData.spawn.y);
@@ -793,6 +915,15 @@ export class GameScene extends Phaser.Scene {
     if (this.weaponPickups) {
       this.weaponPickups.clear(true, true);
       this.createWeaponPickup();
+    }
+    this.nearbyWeaponPickup = null;
+    if (this.boss && this.levelData.boss) {
+      this.boss.reset(this.levelData.boss.x, this.levelData.boss.y);
+    }
+    if (this.levelData.goal && this.levelData.goal.initiallyHidden) {
+      this.goal.setVisible(false);
+      if (this.goal.body) this.goal.body.enable = false;
+      if (this.goalLabel) this.goalLabel.setVisible(false);
     }
 
     this.player.reset(this.levelData.spawn.x, this.levelData.spawn.y);
@@ -958,6 +1089,17 @@ export class GameScene extends Phaser.Scene {
           enemy.update(delta);
         }
       });
+      if (this.boss && this.boss.active && this.boss.update) {
+        this.boss.update(delta);
+      }
+    }
+
+    // Nearby weapon pickup proximity check
+    if (this.nearbyWeaponPickup && this.player) {
+      const dist = Phaser.Math.Distance.Between(this.player.x, this.player.y, this.nearbyWeaponPickup.x, this.nearbyWeaponPickup.y);
+      if (dist > 60) {
+        this.nearbyWeaponPickup = null;
+      }
     }
 
     // Fall death check
@@ -965,9 +1107,9 @@ export class GameScene extends Phaser.Scene {
       this.handlePlayerDeath('pit');
     }
 
-    // Player attack trigger via InputSystem (for virtual touch controls or key checks)
+    // Player attack / use trigger via InputSystem (for virtual touch controls or key checks)
     if (this.inputSystem && typeof this.inputSystem.isAttackJustPressed === 'function' && this.inputSystem.isAttackJustPressed()) {
-      this.handlePlayerAttack();
+      this.handleUseOrAttackKey();
     }
 
     // Telemetry readout
@@ -989,7 +1131,10 @@ export class GameScene extends Phaser.Scene {
     let wx = this.levelData.spawn.x + 180;
     let wy = this.levelData.spawn.y - 20;
 
-    if (this.levelData.platforms && this.levelData.platforms.length > 0) {
+    if (this.levelData.isBossLevel) {
+      wx = this.levelData.spawn.x + 110;
+      wy = this.levelData.spawn.y - 12;
+    } else if (this.levelData.platforms && this.levelData.platforms.length > 0) {
       const targetIdx = Math.min(2, Math.floor(this.levelData.platforms.length / 2));
       const targetPlat = this.levelData.platforms[targetIdx];
       if (targetPlat) {
@@ -1021,6 +1166,21 @@ export class GameScene extends Phaser.Scene {
   }
 
   /**
+   * Handles [E] key: collects weapon if near a pickup, or attacks with equipped firearm
+   */
+  handleUseOrAttackKey() {
+    if (this.uiSystem && (this.uiSystem.isTitleActive() || this.uiSystem.isPaused() || this.uiSystem.isGameOverActive())) {
+      return;
+    }
+    if (this.nearbyWeaponPickup && this.nearbyWeaponPickup.active && !this.nearbyWeaponPickup.isCollected) {
+      this.handleWeaponPickup(this.player, this.nearbyWeaponPickup);
+      this.nearbyWeaponPickup = null;
+      return;
+    }
+    this.handlePlayerAttack();
+  }
+
+  /**
    * Triggers player weapon attack
    */
   handlePlayerAttack() {
@@ -1039,9 +1199,24 @@ export class GameScene extends Phaser.Scene {
    */
   handleBulletEnemyHit(bullet, enemy) {
     if (!bullet || !bullet.active || !enemy || !enemy.active) return;
+    const dmg = bullet.damage || 10;
     bullet.explode(true);
 
-    if (typeof enemy.defeat === 'function' && (!enemy.getState || enemy.getState() !== 'DEFEATED')) {
+    if (typeof enemy.takeDamage === 'function') {
+      const remainingHp = enemy.takeDamage(dmg);
+      if (remainingHp <= 0) {
+        if (this.cameras && this.cameras.main) {
+          this.cameras.main.shake(120, 0.007);
+        }
+        if (this.audioSystem) {
+          this.audioSystem.playSFX(AUDIO_KEYS.ENEMY_DEFEATED || AUDIO_KEYS.POWERUP_ACTIVATE);
+        }
+      } else {
+        if (this.audioSystem) {
+          this.audioSystem.playSFX(AUDIO_KEYS.PLAYER_DAMAGE);
+        }
+      }
+    } else if (typeof enemy.defeat === 'function' && (!enemy.getState || enemy.getState() !== 'DEFEATED')) {
       enemy.defeat();
       if (this.cameras && this.cameras.main) {
         this.cameras.main.shake(120, 0.007);

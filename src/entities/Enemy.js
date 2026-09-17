@@ -32,12 +32,19 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     scene.add.existing(this);
     scene.physics.add.existing(this);
 
+    // Health & Health Bar (24px wide, visibly shorter than player's 48px bar)
+    this.maxHealth = this.config.BASE_HEALTH || 15;
+    this.currentHealth = this.maxHealth;
+    this.healthBar = scene.add.graphics();
+    this.healthBar.setDepth(16);
+
     // Physics Bounding Box
     this.setSize(this.config.WIDTH, this.config.HEIGHT);
     this.setOffset(1, 1);
     this.setBounce(0);
     this.setCollideWorldBounds(true);
     this.body.setGravityY(this.config.GRAVITY);
+    this.renderHealthBar();
   }
 
   /**
@@ -60,6 +67,90 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
 
     // 3. Platform Edge Detection
     this.checkPlatformEdge();
+
+    // 4. Track overhead health bar position
+    this.updateHealthBarPosition();
+  }
+
+  /**
+   * Repositions overhead health bar directly above enemy sprite
+   */
+  updateHealthBarPosition() {
+    if (!this.healthBar || !this.active) return;
+    this.healthBar.setPosition(this.x, this.y);
+  }
+
+  /**
+   * Renders compact overhead health bar (24px, shorter than player's 48px bar)
+   */
+  renderHealthBar() {
+    if (!this.healthBar) return;
+    this.healthBar.clear();
+
+    if (this.state === EnemyState.DEFEATED || !this.visible) {
+      return;
+    }
+
+    const barW = this.config.HEALTH_BAR_WIDTH || 24;
+    const barH = this.config.HEALTH_BAR_HEIGHT || 3.5;
+    const offX = -barW / 2;
+    const offY = -(this.height / 2 + 8);
+
+    // Background box
+    this.healthBar.fillStyle(0x000000, 0.75);
+    this.healthBar.fillRect(offX - 1, offY - 1, barW + 2, barH + 2);
+    this.healthBar.fillStyle(0x0f172a, 0.9);
+    this.healthBar.fillRect(offX, offY, barW, barH);
+
+    // Health Fill
+    const safeMax = Math.max(1, this.maxHealth);
+    const safeHp = Math.max(0, Math.min(safeMax, this.currentHealth));
+    const ratio = safeHp / safeMax;
+    const fillW = Math.round(barW * ratio);
+
+    if (fillW > 0) {
+      let fillColor = 0x22c55e;
+      if (ratio <= 0.3) {
+        fillColor = 0xef4444;
+      } else if (ratio <= 0.6) {
+        fillColor = 0xf59e0b;
+      }
+      this.healthBar.fillStyle(fillColor, 1);
+      this.healthBar.fillRect(offX, offY, fillW, barH);
+    }
+
+    // Border
+    this.healthBar.lineStyle(1, 0x475569, 0.85);
+    this.healthBar.strokeRect(offX, offY, barW, barH);
+
+    this.healthBar.setPosition(this.x, this.y);
+  }
+
+  /**
+   * Inflicts damage onto the enemy, updating its health bar
+   * @param {number} [amount=10] Damage dealt
+   * @returns {number} Remaining health
+   */
+  takeDamage(amount = 10) {
+    if (this.state === EnemyState.DEFEATED || !this.active) return 0;
+    this.currentHealth = Math.max(0, this.currentHealth - amount);
+
+    // Visual damage reaction flash
+    this.setTint(0xff5555);
+    this.scene.time.delayedCall(90, () => {
+      if (this.active) this.clearTint();
+    });
+
+    this.renderHealthBar();
+
+    if (this.currentHealth <= 0) {
+      if (this.healthBar) {
+        this.healthBar.destroy();
+        this.healthBar = null;
+      }
+      this.defeat();
+    }
+    return this.currentHealth;
   }
 
   /**
@@ -122,6 +213,11 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
 
     // Spawn floating score popup (+200)
     this.spawnScorePopup();
+
+    if (this.healthBar) {
+      this.healthBar.destroy();
+      this.healthBar = null;
+    }
 
     // Defeat animation (squash flat, flash, fade out)
     this.scene.tweens.add({
@@ -187,11 +283,26 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     this.direction = -1;
     this.currentPlatform = null;
 
+    this.currentHealth = this.maxHealth;
+    if (!this.healthBar && this.scene) {
+      this.healthBar = this.scene.add.graphics();
+      this.healthBar.setDepth(16);
+    }
+    this.renderHealthBar();
+
     if (this.body) {
       this.body.enable = true;
       this.body.reset(x, y);
       this.setVelocity(0, 0);
     }
+  }
+
+  destroy(fromScene) {
+    if (this.healthBar) {
+      this.healthBar.destroy();
+      this.healthBar = null;
+    }
+    super.destroy(fromScene);
   }
 
   isActive() {

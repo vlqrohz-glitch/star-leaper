@@ -2,7 +2,7 @@
 $ErrorActionPreference = "Stop"
 
 $chromePath = "C:\Program Files\Google\Chrome\Application\chrome.exe"
-$outPng = "C:\Users\muiz.hameed\.gemini\antigravity-ide\brain\044960da-198e-418f-bf61-f26214234334\netlify_live_screenshot.png"
+$outPng = Join-Path $PSScriptRoot "live_verified.png"
 $freshDir = "C:\Users\muiz.hameed\.gemini\antigravity-ide\scratch\chrome_scr_" + [Guid]::NewGuid().ToString("N")
 
 $chromeProc = Start-Process $chromePath `

@@ -471,9 +471,9 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       return;
     }
 
-    const barW = 36;
+    const barW = 48;
     const barH = 5;
-    const offX = -18;
+    const offX = -24;
     const offY = -28;
 
     // Background shadow and backing box

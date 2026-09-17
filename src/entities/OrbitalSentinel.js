@@ -18,6 +18,9 @@ export class OrbitalSentinel extends Enemy {
     this.body.setAllowGravity(false);
     this.setSize(cfg.width || 24, cfg.height || 24);
     this.setOffset(2, 1);
+    this.maxHealth = cfg.health || 20;
+    this.currentHealth = this.maxHealth;
+    this.renderHealthBar();
   }
 
   update(delta) {
@@ -37,6 +40,8 @@ export class OrbitalSentinel extends Enemy {
     } else if (this.body.blocked.right && this.direction > 0) {
       this.reverseDirection();
     }
+
+    this.updateHealthBarPosition();
   }
 
   reset(x = this.initialX, y = this.initialY) {

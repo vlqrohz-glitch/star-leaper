@@ -249,11 +249,11 @@ export class UISystem {
       strokeThickness: 3
     });
 
-    // Line 3: CONTROLS & SHORTCUT GUIDE
+    // Line 3: CONTROLS & SHORTCUT GUIDE (Primary Attack/Use: [E], also supports Attack: [F])
     this.guideText = this.scene.add.text(
       pad.x,
       pad.y + 42,
-      'Move: [A/D] | Jump: [Space/W] | Attack: [F] | Pause: [ESC] | Scores: [B] | Restart: [R]',
+      'Move: [A/D] | Jump: [Space/W] | Attack/Use: [E] | Pause: [ESC] | Scores: [B] | Restart: [R]',
       {
         fontFamily: UI_CONFIG.BODY_FONT_FAMILY,
         fontSize: '11px',
@@ -272,6 +272,27 @@ export class UISystem {
       strokeThickness: 2
     });
 
+    // Arena Boss Health Bar (Centered in top HUD)
+    this.hudBossContainer = this.scene.add.container(400, 26).setVisible(false);
+    const bossBarBg = this.scene.add.rectangle(0, 0, 260, 16, 0x0f172a, 0.92);
+    bossBarBg.setStrokeStyle(1.5, 0xef4444, 0.9);
+    this.hudBossText = this.scene.add.text(0, -14, '★ BOSS: ALPHA DREADNOUGHT ★', {
+      fontFamily: UI_CONFIG.FONT_FAMILY,
+      fontSize: '8px',
+      color: '#ef4444',
+      stroke: '#000000',
+      strokeThickness: 3
+    }).setOrigin(0.5);
+    this.hudBossFill = this.scene.add.rectangle(-125, 0, 250, 10, 0xef4444, 1).setOrigin(0, 0.5);
+    this.hudBossHpText = this.scene.add.text(0, 0, '150 / 150', {
+      fontFamily: UI_CONFIG.FONT_FAMILY,
+      fontSize: '7px',
+      color: '#ffffff',
+      stroke: '#000000',
+      strokeThickness: 2
+    }).setOrigin(0.5);
+    this.hudBossContainer.add([bossBarBg, this.hudBossFill, this.hudBossText, this.hudBossHpText]);
+
     this.hudContainer.add([
       this.hudScoreText,
       this.hudCrystalsText,
@@ -288,7 +309,8 @@ export class UISystem {
       this.hudWeaponText,
       this.hudPowerUpText,
       this.guideText,
-      this.telemetryText
+      this.telemetryText,
+      this.hudBossContainer
     ]);
   }
 
@@ -1477,20 +1499,24 @@ export class UISystem {
     this.hudCrystalsText.setText(`★  CRYSTALS: ${formattedCrystals}`);
 
     // Sector & Operative info
-    const secNum = this.scene.currentLevelIndex || (this.scene.levelData && this.scene.levelData.id ? this.scene.levelData.id.replace('level_', '') : 1);
+    const secNum = this.scene.levelIndex || this.scene.currentLevelIndex || 1;
+    const subNum = this.scene.subLevel || 1;
     const charName = this.scene.player && this.scene.player.characterProfile ? this.scene.player.characterProfile.getName().toUpperCase() : 'NOVA';
     if (this.hudSectorText) {
-      this.hudSectorText.setText(`SEC ${secNum} • ${charName}`);
+      const subTag = (subNum === 10) ? '[FINAL BOSS]' : `STAGE ${subNum}/10`;
+      this.hudSectorText.setText(`SEC ${secNum} • ${subTag} • ${charName}`);
     }
 
-    // Line 2: Health (Segmented Shields) & Lives
+    // Line 2: Health (Segmented Shields / HP Bar) & Lives
     const hp = this.scene.healthSystem ? this.scene.healthSystem.getHealth() : 3;
     const maxHp = this.scene.healthSystem ? this.scene.healthSystem.getMaxHealth() : 3;
     const lives = this.scene.livesSystem ? this.scene.livesSystem.getLives() : 3;
 
     let shieldBar = '';
-    for (let i = 0; i < maxHp; i++) {
-      shieldBar += (i < hp) ? '■' : '□';
+    const barSegments = (maxHp > 10) ? 10 : maxHp;
+    const filledSegments = (maxHp > 10) ? Math.round((hp / maxHp) * 10) : hp;
+    for (let i = 0; i < barSegments; i++) {
+      shieldBar += (i < filledSegments) ? '■' : '□';
     }
     this.hudStatusText.setText(`HEALTH: [${shieldBar}] ${hp}/${maxHp}   LIVES: ${lives}`);
 
@@ -1515,7 +1541,25 @@ export class UISystem {
       const activeWeapon = (this.scene.player && typeof this.scene.player.getWeapon === 'function')
         ? this.scene.player.getWeapon()
         : 'REVOLVER';
-      this.hudWeaponText.setText(`WEAPON: [${activeWeapon}] [F]`);
+      this.hudWeaponText.setText(`WEAPON: [${activeWeapon}] [E]`);
+    }
+
+    // Arena Boss Health Bar update
+    if (this.hudBossContainer) {
+      const boss = this.scene.boss;
+      if (boss && boss.active && boss.state === 'ACTIVE') {
+        this.hudBossContainer.setVisible(true);
+        const bHp = Math.max(0, boss.currentHealth);
+        const bMax = Math.max(1, boss.maxHealth);
+        const bRatio = Math.max(0, Math.min(1, bHp / bMax));
+        this.hudBossText.setText(`★ BOSS: ${boss.config.name} ★`);
+        this.hudBossText.setColor(boss.config.colorHex || '#ef4444');
+        this.hudBossFill.width = Math.round(250 * bRatio);
+        this.hudBossFill.setFillStyle(boss.config.colorNum || 0xef4444, 1);
+        this.hudBossHpText.setText(`${bHp} / ${bMax} HP`);
+      } else {
+        this.hudBossContainer.setVisible(false);
+      }
     }
   }
 

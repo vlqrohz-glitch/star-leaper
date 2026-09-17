@@ -12,7 +12,7 @@ export const WEAPON_TYPES = Object.freeze([
 export const WEAPON_META = Object.freeze({
   REVOLVER: {
     name: 'Revolver',
-    label: '[F] SIX-SHOOTER',
+    label: '[E] SIX-SHOOTER',
     desc: 'High-velocity brass rounds',
     colorHex: '#facc15',
     colorNum: 0xfacc15,
@@ -20,7 +20,7 @@ export const WEAPON_META = Object.freeze({
   },
   PLASMA_BLASTER: {
     name: 'Plasma Blaster',
-    label: '[F] PLASMA BLASTER',
+    label: '[E] PLASMA BLASTER',
     desc: 'Rapid ion energy bolts',
     colorHex: '#00f0ff',
     colorNum: 0x00f0ff,
@@ -28,7 +28,7 @@ export const WEAPON_META = Object.freeze({
   },
   PHOTON_RIFLE: {
     name: 'Photon Rifle',
-    label: '[F] PHOTON RIFLE',
+    label: '[E] PHOTON RIFLE',
     desc: 'Piercing long-range beam',
     colorHex: '#c084fc',
     colorNum: 0xc084fc,
@@ -36,7 +36,7 @@ export const WEAPON_META = Object.freeze({
   },
   DYNAMITE_LAUNCHER: {
     name: 'Dynamite Launcher',
-    label: '[F] DYNAMITE LAUNCHER',
+    label: '[E] DYNAMITE LAUNCHER',
     desc: 'Arcing explosive cluster',
     colorHex: '#ef4444',
     colorNum: 0xef4444,
@@ -44,7 +44,7 @@ export const WEAPON_META = Object.freeze({
   },
   SHOTGUN: {
     name: 'Cosmic Scattergun',
-    label: '[F] SCATTERGUN',
+    label: '[E] SCATTERGUN',
     desc: 'Devastating spread pellets',
     colorHex: '#f59e0b',
     colorNum: 0xf59e0b,
@@ -90,7 +90,7 @@ export class WeaponPickup extends Phaser.Physics.Arcade.Sprite {
     this.halo.setDepth(13);
 
     // Overhead Floating HUD prompt
-    this.promptText = scene.add.text(x, y - 22, meta.label, {
+    this.promptText = scene.add.text(x, y - 22, `[E] COLLECT ${meta.name.toUpperCase()}`, {
       fontFamily: UI_CONFIG.FONT_FAMILY,
       fontSize: '7px',
       color: meta.colorHex,
@@ -100,8 +100,8 @@ export class WeaponPickup extends Phaser.Physics.Arcade.Sprite {
 
     // Continuous floating/bobbing animation
     this.bobTween = scene.tweens.add({
-      targets: [this, this.halo],
-      y: y - 8,
+      targets: [this, this.halo, this.promptText],
+      y: '-=8',
       duration: 850,
       yoyo: true,
       repeat: -1,
@@ -162,7 +162,7 @@ export class WeaponPickup extends Phaser.Physics.Arcade.Sprite {
   }
 
   spawnPickupBanner() {
-    const banner = this.scene.add.text(this.x, this.y - 28, `⚔️ ${this.meta.name.toUpperCase()} EQUIPPED!\nPRESS [F] TO ATTACK`, {
+    const banner = this.scene.add.text(this.x, this.y - 28, `⚔️ ${this.meta.name.toUpperCase()} EQUIPPED!\nPRESS [E] TO ATTACK`, {
       fontFamily: UI_CONFIG.FONT_FAMILY,
       fontSize: '8px',
       color: this.meta.colorHex,

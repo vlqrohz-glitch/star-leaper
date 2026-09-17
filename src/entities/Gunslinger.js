@@ -16,6 +16,9 @@ export class Gunslinger extends Enemy {
     this.isTelegraphing = false;
     this.setSize(22, 24);
     this.setOffset(2, 2);
+    this.maxHealth = 30;
+    this.currentHealth = this.maxHealth;
+    this.renderHealthBar();
   }
 
   update(delta) {
@@ -35,11 +38,14 @@ export class Gunslinger extends Enemy {
     // Check if player is in line of sight (horizontal alley)
     if (dist < this.shootRange && dy < 65 && (now - this.lastShotTime > this.shootCooldown)) {
       this.aimAndFire(dx < 0 ? -1 : 1);
+      this.updateHealthBarPosition();
       return;
     }
 
     if (!this.isTelegraphing) {
       super.update(delta);
+    } else {
+      this.updateHealthBarPosition();
     }
   }
 

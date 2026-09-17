@@ -40,6 +40,7 @@ export class BootScene extends Phaser.Scene {
     this.createPetTextures();
     this.createShopBadgeTextures();
     this.createWeaponAndCombatTextures();
+    this.createBossTextures();
 
     // Dismiss loading indicator with fade
     const loader = document.getElementById('game-loading-indicator');
@@ -1515,5 +1516,166 @@ export class BootScene extends Phaser.Scene {
     sc.fillCircle(3, 3, 1.5);
     sc.generateTexture('player_scatter', 6, 6);
     sc.destroy();
+  }
+
+  /* -------------------------------------------------------------
+     10. SECTOR FINAL BOSS TEXTURES (SECTORS 1 - 6)
+     ------------------------------------------------------------- */
+  createBossTextures() {
+    // 1. Sector 1: Alpha Dreadnought Mech (48x44 Cyan/Steel Heavy Mech)
+    const dG = this.make.graphics({ x: 0, y: 0, add: false });
+    // Heavy Armored Chassis
+    dG.fillStyle(0x0f172a, 1);
+    dG.fillRoundedRect(6, 10, 36, 26, 4);
+    // Outer Shoulder Weapon Pods
+    dG.fillStyle(0x1e293b, 1);
+    dG.fillRect(2, 6, 8, 18);
+    dG.fillRect(38, 6, 8, 18);
+    // Railgun barrels
+    dG.fillStyle(0x475569, 1);
+    dG.fillRect(0, 10, 4, 6);
+    dG.fillRect(44, 10, 4, 6);
+    // Core Reactor Cockpit (Cyan Glow)
+    dG.fillStyle(0x00f0ff, 0.4);
+    dG.fillCircle(24, 22, 10);
+    dG.fillStyle(0x00f0ff, 1);
+    dG.fillCircle(24, 22, 6);
+    dG.fillStyle(0xffffff, 1);
+    dG.fillCircle(24, 22, 2.5);
+    // Upper Sensor Antennae
+    dG.fillStyle(0x00f0ff, 1);
+    dG.fillRect(16, 2, 3, 8);
+    dG.fillRect(29, 2, 3, 8);
+    // Thruster exhaust
+    dG.fillStyle(0x38bdf8, 1);
+    dG.fillRect(12, 36, 6, 4);
+    dG.fillRect(30, 36, 6, 4);
+    dG.generateTexture('boss_dreadnought', 48, 44);
+    dG.destroy();
+
+    // 2. Sector 2: Orbital Behemoth Core (48x44 Sapphire Station AI Core)
+    const oG = this.make.graphics({ x: 0, y: 0, add: false });
+    // Outer Station Defense Ring
+    oG.lineStyle(3, 0x0284c7, 1);
+    oG.strokeCircle(24, 22, 18);
+    oG.fillStyle(0x0f172a, 0.95);
+    oG.fillCircle(24, 22, 16);
+    // Heavy Armor Vanes
+    oG.fillStyle(0x38bdf8, 1);
+    oG.fillRect(4, 20, 6, 4);
+    oG.fillRect(38, 20, 6, 4);
+    oG.fillRect(22, 2, 4, 6);
+    oG.fillRect(22, 36, 4, 6);
+    // Core Eye
+    oG.fillStyle(0x0369a1, 1);
+    oG.fillCircle(24, 22, 10);
+    oG.fillStyle(0x38bdf8, 1);
+    oG.fillCircle(24, 22, 6);
+    oG.fillStyle(0xffffff, 1);
+    oG.fillCircle(24, 22, 3);
+    oG.generateTexture('boss_orbital_behemoth', 48, 44);
+    oG.destroy();
+
+    // 3. Sector 3: Void Leviathan (50x44 Nebula Void Serpent)
+    const vG = this.make.graphics({ x: 0, y: 0, add: false });
+    // Segmented Void Carapace
+    vG.fillStyle(0x3b0764, 1);
+    vG.fillRoundedRect(6, 8, 38, 28, 6);
+    // Ethereal Wings/Fins
+    vG.fillStyle(0x7e22ce, 0.85);
+    vG.fillTriangle(6, 12, 0, 4, 10, 24);
+    vG.fillTriangle(44, 12, 50, 4, 40, 24);
+    // Glowing Nebula Ribs
+    vG.fillStyle(0xc084fc, 1);
+    vG.fillRect(14, 12, 22, 3);
+    vG.fillRect(16, 19, 18, 3);
+    vG.fillRect(18, 26, 14, 3);
+    // Triple Ocular Sensors
+    vG.fillStyle(0xf0abfc, 1);
+    vG.fillCircle(20, 14, 2.5);
+    vG.fillCircle(30, 14, 2.5);
+    vG.fillCircle(25, 8, 3);
+    vG.generateTexture('boss_void_leviathan', 50, 44);
+    vG.destroy();
+
+    // 4. Sector 4: Magma Colossus (50x46 Volcanic Titan)
+    const mG = this.make.graphics({ x: 0, y: 0, add: false });
+    // Dark Basalt Body
+    mG.fillStyle(0x18181b, 1);
+    mG.fillRoundedRect(6, 6, 38, 34, 5);
+    // Shoulders
+    mG.fillStyle(0x27272a, 1);
+    mG.fillRect(2, 10, 8, 14);
+    mG.fillRect(40, 10, 8, 14);
+    // Magma Fissures
+    mG.fillStyle(0xf97316, 1);
+    mG.fillRect(12, 16, 26, 4);
+    mG.fillRect(22, 16, 6, 20);
+    mG.fillRect(14, 28, 22, 4);
+    // Burning Core
+    mG.fillStyle(0xfde047, 1);
+    mG.fillCircle(25, 23, 5);
+    mG.fillStyle(0xffffff, 1);
+    mG.fillCircle(25, 23, 2);
+    // Flaming Horns
+    mG.fillStyle(0xef4444, 1);
+    mG.fillTriangle(14, 6, 10, 0, 18, 6);
+    mG.fillTriangle(36, 6, 40, 0, 32, 6);
+    mG.generateTexture('boss_magma_colossus', 50, 46);
+    mG.destroy();
+
+    // 5. Sector 5: Zenith Sovereign (48x46 Ancient Warp Deity)
+    const zG = this.make.graphics({ x: 0, y: 0, add: false });
+    // Sacred Halo
+    zG.lineStyle(2, 0xfacc15, 0.9);
+    zG.strokeCircle(24, 14, 12);
+    // Gold/Platinum Ancient Torso
+    zG.fillStyle(0x1e1b4b, 1);
+    zG.fillRoundedRect(8, 12, 32, 28, 4);
+    zG.fillStyle(0xfacc15, 1);
+    zG.fillRect(12, 14, 24, 6);
+    zG.fillRect(14, 24, 20, 4);
+    // Celestial Eye Core
+    zG.fillStyle(0x00f0ff, 1);
+    zG.fillCircle(24, 23, 6);
+    zG.fillStyle(0xffffff, 1);
+    zG.fillCircle(24, 23, 2.5);
+    // Floating Obelisk Spires
+    zG.fillStyle(0xeab308, 1);
+    zG.fillTriangle(2, 28, 6, 14, 8, 28);
+    zG.fillTriangle(46, 28, 42, 14, 40, 28);
+    zG.generateTexture('boss_zenith_overlord', 48, 46);
+    zG.destroy();
+
+    // 6. Sector 6: Cyber Outlaw King (46x46 El Bandido Supremo)
+    const kG = this.make.graphics({ x: 0, y: 0, add: false });
+    // Cyber Duster Coat
+    kG.fillStyle(0x451a03, 1);
+    kG.fillRoundedRect(8, 18, 30, 24, 3);
+    // Giant Outlaw Cowboy Hat Brim & Crown
+    kG.fillStyle(0x78350f, 1);
+    kG.fillRect(2, 12, 42, 5);
+    kG.fillRect(12, 4, 22, 9);
+    kG.fillStyle(0xfacc15, 1);
+    kG.fillRect(12, 11, 22, 2); // Gold hat band
+    // Cyber Face & Monocle
+    kG.fillStyle(0x1c1917, 1);
+    kG.fillRect(14, 17, 18, 10);
+    // Glowing Crimson Cyber Ocular Eye
+    kG.fillStyle(0xef4444, 1);
+    kG.fillCircle(25, 21, 3.5);
+    kG.fillStyle(0xffffff, 1);
+    kG.fillCircle(25, 21, 1.5);
+    // Dual Outlaw Heavy Blasters
+    kG.fillStyle(0xfacc15, 1);
+    kG.fillRect(2, 26, 8, 5);
+    kG.fillRect(36, 26, 8, 5);
+    // Dynamite Sticks on Bandolier
+    kG.fillStyle(0xdc2626, 1);
+    kG.fillRect(14, 32, 5, 6);
+    kG.fillRect(21, 32, 5, 6);
+    kG.fillRect(28, 32, 5, 6);
+    kG.generateTexture('boss_outlaw_king', 46, 46);
+    kG.destroy();
   }
 }

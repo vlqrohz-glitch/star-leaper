@@ -16,6 +16,9 @@ export class NebulaWisp extends Enemy {
     this.body.setAllowGravity(false);
     this.setSize(cfg.width || 20, cfg.height || 20);
     this.setOffset(2, 2);
+    this.maxHealth = cfg.health || 15;
+    this.currentHealth = this.maxHealth;
+    this.renderHealthBar();
 
     // Shimmering alpha pulse
     this.scene.tweens.add({
@@ -34,6 +37,7 @@ export class NebulaWisp extends Enemy {
     const now = (this.scene.time ? this.scene.time.now : 0) + this.timeOffset;
     this.x = this.initialX + Math.cos(now * this.orbitSpeed) * this.orbitRadius;
     this.y = this.initialY + Math.sin(now * this.orbitSpeed) * (this.orbitRadius * 0.6);
+    this.updateHealthBarPosition();
   }
 
   reset(x = this.initialX, y = this.initialY) {

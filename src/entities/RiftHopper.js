@@ -16,6 +16,9 @@ export class RiftHopper extends Enemy {
 
     this.setSize(cfg.width || 20, cfg.height || 22);
     this.setOffset(1, 1);
+    this.maxHealth = cfg.health || 20;
+    this.currentHealth = this.maxHealth;
+    this.renderHealthBar();
   }
 
   update(delta) {
@@ -41,6 +44,8 @@ export class RiftHopper extends Enemy {
       // While in mid-air, maintain horizontal leaping speed
       this.setVelocityX(this.direction * this.hopForceX);
     }
+
+    this.updateHealthBarPosition();
   }
 
   hop() {

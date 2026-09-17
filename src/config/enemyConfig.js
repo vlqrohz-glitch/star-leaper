@@ -25,9 +25,15 @@ export const ENEMY_CONFIG = {
   WIDTH: 22,
   HEIGHT: 20,
 
+  // Health & Durability
+  BASE_HEALTH: 15,              // Default drone health
+  HEALTH_BAR_WIDTH: 24,         // Shorter than player's 48px overhead bar
+  HEALTH_BAR_HEIGHT: 3.5,
+
   // Specific Configurations for Expanded Roster
   VOID_CRAWLER: {
     speed: 45,
+    health: 25,
     texture: 'void_crawler',
     score: 200,
     width: 24,
@@ -35,6 +41,7 @@ export const ENEMY_CONFIG = {
   },
   ORBITAL_SENTINEL: {
     speed: 65,
+    health: 20,
     amplitudeY: 35,
     waveFreq: 0.003,
     texture: 'orbital_sentinel',
@@ -44,6 +51,7 @@ export const ENEMY_CONFIG = {
   },
   RIFT_HOPPER: {
     hopInterval: 1400,
+    health: 20,
     hopForceY: -290,
     hopForceX: 95,
     texture: 'rift_hopper',
@@ -53,6 +61,7 @@ export const ENEMY_CONFIG = {
   },
   NEBULA_WISP: {
     speed: 50,
+    health: 15,
     orbitRadius: 40,
     texture: 'nebula_wisp',
     score: 200,
@@ -61,6 +70,7 @@ export const ENEMY_CONFIG = {
   },
   GUNSLINGER: {
     speed: 40,
+    health: 30,
     texture: 'gunslinger',
     score: 250,
     width: 22,
@@ -68,6 +78,7 @@ export const ENEMY_CONFIG = {
   },
   DYNAMITE_BANDIT: {
     speed: 35,
+    health: 25,
     texture: 'dynamite_bandit',
     score: 250,
     width: 22,

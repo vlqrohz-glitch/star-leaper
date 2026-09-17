@@ -77,6 +77,7 @@ export class LevelSelectScene extends Phaser.Scene {
   init(data) {
     this.characterId = data && data.characterId ? data.characterId : DEFAULT_CHARACTER_ID;
     this.currentIndex = data && data.levelIndex ? data.levelIndex - 1 : 0;
+    this.selectedSubLevel = data && data.subLevel ? data.subLevel : 1;
   }
 
   create() {
@@ -207,10 +208,49 @@ export class LevelSelectScene extends Phaser.Scene {
 
     this.updateRowHighlight();
 
+    // 10 Sublevel Selector Chips (Stages 1 - 9 and Stage 10: FINAL BOSS)
+    this.subLevelChips = [];
+    const chipContainer = this.add.container(w / 2, 376);
+    this.add.text(w / 2 - 275, 376, 'STAGE:', {
+      fontFamily: UI_CONFIG.FONT_FAMILY,
+      fontSize: '9px',
+      color: '#94a3b8'
+    }).setOrigin(0.5);
+
+    const chipStartX = -225;
+    const chipSpacingX = 42;
+    for (let s = 1; s <= 10; s++) {
+      const isBoss = (s === 10);
+      const cx = isBoss ? chipStartX + (s - 1) * chipSpacingX + 22 : chipStartX + (s - 1) * chipSpacingX;
+      const chipW = isBoss ? 76 : 34;
+      const chipH = 20;
+
+      const chipBg = this.add.rectangle(cx, 0, chipW, chipH, 0x0f172a, 0.9);
+      chipBg.setStrokeStyle(1.5, isBoss ? 0xef4444 : 0x334155, 0.9);
+
+      const label = isBoss ? '10: BOSS ⚔️' : `[${s}]`;
+      const chipText = this.add.text(cx, 0, label, {
+        fontFamily: UI_CONFIG.FONT_FAMILY,
+        fontSize: isBoss ? '7px' : '8px',
+        color: isBoss ? '#ef4444' : '#e2e8f0'
+      }).setOrigin(0.5);
+
+      chipBg.setInteractive({ useHandCursor: true });
+      chipBg.on('pointerdown', () => {
+        this.selectedSubLevel = s;
+        this.updateSubLevelHighlight();
+      });
+
+      chipContainer.add([chipBg, chipText]);
+      this.subLevelChips.push({ bg: chipBg, text: chipText, sub: s, isBoss });
+    }
+
+    this.updateSubLevelHighlight();
+
     // Bottom Navigation Help
-    this.add.text(w / 2, 410, '[↑/↓] or [W/S] Choose Sector  •  [1-6] Quick Jump  •  [ENTER] Launch  •  [ESC] Back', {
+    this.add.text(w / 2, 412, '[↑/↓] Sector  •  [←/→] Stage (1-10)  •  [ENTER] Launch  •  [ESC] Back', {
       fontFamily: UI_CONFIG.BODY_FONT_FAMILY,
-      fontSize: '13px',
+      fontSize: '12px',
       color: '#64748b'
     }).setOrigin(0.5);
 
@@ -219,11 +259,15 @@ export class LevelSelectScene extends Phaser.Scene {
     this.input.keyboard.on('keydown-DOWN', () => this.moveSelection(1));
     this.input.keyboard.on('keydown-W', () => this.moveSelection(-1));
     this.input.keyboard.on('keydown-S', () => this.moveSelection(1));
+    this.input.keyboard.on('keydown-LEFT', () => this.moveSubLevel(-1));
+    this.input.keyboard.on('keydown-RIGHT', () => this.moveSubLevel(1));
+    this.input.keyboard.on('keydown-A', () => this.moveSubLevel(-1));
+    this.input.keyboard.on('keydown-D', () => this.moveSubLevel(1));
     this.input.keyboard.on('keydown-ENTER', () => this.launchLevel());
     this.input.keyboard.on('keydown-SPACE', () => this.launchLevel());
     this.input.keyboard.on('keydown-ESC', () => this.goBack());
 
-    // Number keys 1-6
+    // Number keys 1-6 for quick sector selection
     for (let i = 1; i <= LEVEL_CATALOG.length; i++) {
       this.input.keyboard.on(`keydown-${i}`, () => {
         this.currentIndex = i - 1;
@@ -236,6 +280,31 @@ export class LevelSelectScene extends Phaser.Scene {
   moveSelection(delta) {
     this.currentIndex = (this.currentIndex + delta + LEVEL_CATALOG.length) % LEVEL_CATALOG.length;
     this.updateRowHighlight();
+  }
+
+  moveSubLevel(delta) {
+    this.selectedSubLevel = ((this.selectedSubLevel - 1 + delta + 10) % 10) + 1;
+    this.updateSubLevelHighlight();
+  }
+
+  updateSubLevelHighlight() {
+    if (!this.subLevelChips) return;
+    this.subLevelChips.forEach(chip => {
+      const isSel = chip.sub === this.selectedSubLevel;
+      if (isSel) {
+        chip.bg.setFillStyle(chip.isBoss ? 0x7f1d1d : 0x0284c7, 1);
+        chip.bg.setStrokeStyle(2, chip.isBoss ? 0xfacc15 : 0x00f0ff, 1);
+        chip.text.setColor(chip.isBoss ? '#facc15' : '#ffffff');
+        chip.bg.setScale(1.06);
+        chip.text.setScale(1.06);
+      } else {
+        chip.bg.setFillStyle(0x0f172a, 0.9);
+        chip.bg.setStrokeStyle(1.5, chip.isBoss ? 0xef4444 : 0x334155, 0.85);
+        chip.text.setColor(chip.isBoss ? '#ef4444' : '#94a3b8');
+        chip.bg.setScale(1.0);
+        chip.text.setScale(1.0);
+      }
+    });
   }
 
   updateRowHighlight() {
@@ -260,6 +329,7 @@ export class LevelSelectScene extends Phaser.Scene {
     const selectedLevel = LEVEL_CATALOG[this.currentIndex];
     this.scene.start('GameScene', {
       levelIndex: selectedLevel.index,
+      subLevel: this.selectedSubLevel || 1,
       levelId: selectedLevel.id,
       characterId: this.characterId
     });

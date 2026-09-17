@@ -11,6 +11,7 @@ export class InputSystem {
       down: Phaser.Input.Keyboard.KeyCodes.S,
       right: Phaser.Input.Keyboard.KeyCodes.D,
       space: Phaser.Input.Keyboard.KeyCodes.SPACE,
+      use: Phaser.Input.Keyboard.KeyCodes.E,
       attack: Phaser.Input.Keyboard.KeyCodes.F
     });
 
@@ -69,15 +70,22 @@ export class InputSystem {
   }
 
   isAttack() {
-    return (this.wasd.attack && this.wasd.attack.isDown) || this.touchState.attack;
+    return (this.wasd.use && this.wasd.use.isDown) ||
+           (this.wasd.attack && this.wasd.attack.isDown) ||
+           this.touchState.attack;
   }
 
   isAttackJustPressed() {
-    const justPressed = (this.wasd.attack && Phaser.Input.Keyboard.JustDown(this.wasd.attack)) ||
+    const justPressed = (this.wasd.use && Phaser.Input.Keyboard.JustDown(this.wasd.use)) ||
+                        (this.wasd.attack && Phaser.Input.Keyboard.JustDown(this.wasd.attack)) ||
                         this.touchState.attackJustPressed;
     if (this.touchState.attackJustPressed) {
       this.touchState.attackJustPressed = false;
     }
     return justPressed;
+  }
+
+  isUseJustPressed() {
+    return (this.wasd.use && Phaser.Input.Keyboard.JustDown(this.wasd.use));
   }
 }

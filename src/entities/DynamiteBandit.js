@@ -16,6 +16,9 @@ export class DynamiteBandit extends Enemy {
     this.isThrowing = false;
     this.setSize(22, 24);
     this.setOffset(2, 2);
+    this.maxHealth = 25;
+    this.currentHealth = this.maxHealth;
+    this.renderHealthBar();
   }
 
   update(delta) {
@@ -34,11 +37,14 @@ export class DynamiteBandit extends Enemy {
     // Check if player is within throwing range
     if (dist < this.throwRange && (now - this.lastThrowTime > this.throwCooldown)) {
       this.throwDynamite(dx);
+      this.updateHealthBarPosition();
       return;
     }
 
     if (!this.isThrowing) {
       super.update(delta);
+    } else {
+      this.updateHealthBarPosition();
     }
   }
 
