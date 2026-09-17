@@ -41,9 +41,14 @@ export class BootScene extends Phaser.Scene {
     this.createShopBadgeTextures();
     this.createWeaponAndCombatTextures();
 
-    // Dismiss loading indicator
+    // Dismiss loading indicator with fade
     const loader = document.getElementById('game-loading-indicator');
-    if (loader) loader.remove();
+    if (loader) {
+      loader.style.transition = 'opacity 0.25s ease';
+      loader.style.opacity = '0';
+      loader.style.pointerEvents = 'none';
+      setTimeout(() => loader.remove(), 250);
+    }
 
     // Ready to start GameScene
     this.scene.start('GameScene');

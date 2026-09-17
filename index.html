@@ -617,7 +617,7 @@
 
     <div id="game-container">
       <!-- Loading Indicator / Splash -->
-      <div id="game-loading-indicator" class="loading-overlay">
+      <div id="game-loading-indicator" class="loading-overlay" onclick="if (document.querySelector('#game-container canvas') || (window.game && window.game.isBooted)) { this.style.opacity = '0'; this.style.pointerEvents = 'none'; setTimeout(() => this.remove(), 250); }">
         <div class="quantum-spinner"></div>
         <div class="loading-title">INITIALIZING QUANTUM CORE</div>
         <div class="loading-subtitle">Calibrating Orion Odyssey...</div>
@@ -993,6 +993,20 @@
         }
       }
       bootApp();
+
+      // Universal Failsafe: ensure loader is dismissed once canvas is active or within 3 seconds
+      var loaderFailsafeInterval = setInterval(function() {
+        var loader = document.getElementById('game-loading-indicator');
+        var canvas = document.querySelector('#game-container canvas');
+        if (loader && (canvas || (window.game && window.game.isBooted))) {
+          loader.style.transition = 'opacity 0.3s ease';
+          loader.style.opacity = '0';
+          loader.style.pointerEvents = 'none';
+          setTimeout(function() { if (loader) loader.remove(); }, 350);
+          clearInterval(loaderFailsafeInterval);
+        }
+      }, 300);
+      setTimeout(function() { clearInterval(loaderFailsafeInterval); }, 8000);
     })();
   </script>
 </body>
