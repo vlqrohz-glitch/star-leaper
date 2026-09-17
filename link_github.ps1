@@ -5,7 +5,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory = $false)]
-    [string]$RepoUrl
+    [string]$RepoUrl = "https://github.com/vlqrohz-glitch/star-leaper.git"
 )
 
 $ErrorActionPreference = "Continue"
