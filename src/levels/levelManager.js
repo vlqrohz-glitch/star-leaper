@@ -70,6 +70,122 @@ export const SECTOR_THEMES = Object.freeze({
 });
 
 /**
+ * Generates rich, sector-thematic environmental decorations, character POIs, and scenery
+ * @param {number} sector 1 to 6
+ * @param {number} worldWidth World length in pixels
+ * @param {number} subLevel Sublevel number 1-10
+ * @param {boolean} isBoss Whether this is the final boss arena
+ * @returns {Array<object>} Array of decoration objects
+ */
+export function createSectorDecorations(sector = 1, worldWidth = 2400, subLevel = 1, isBoss = false) {
+  if (isBoss) {
+    if (sector === 6) {
+      return [
+        { x: 160, y: 418, texture: 'poi_sheriff_office', label: '[POI] SHERIFF WYATT • LAST STAND', labelColor: '#facc15', depth: 8 },
+        { x: 80, y: 418, texture: 'scenery_cactus_tall', depth: 7 },
+        { x: 260, y: 418, texture: 'scenery_wagon_wheel', depth: 9 },
+        { x: 1160, y: 418, texture: 'poi_saloon', label: '[POI] EL DIABLO • OUTLAW LAIR', labelColor: '#ef4444', depth: 8 },
+        { x: 1250, y: 418, texture: 'scenery_skull', depth: 9 },
+        { x: 1300, y: 418, texture: 'scenery_cactus_tall', depth: 7 },
+        { x: 120, y: 402, texture: 'holo_sign' }
+      ];
+    }
+    if (sector === 4) {
+      return [
+        { x: 160, y: 418, texture: 'poi_volcanic_foundry', label: '[POI] FORGE-MASTER VULCAN • MAGMA FORGE', labelColor: '#f97316', depth: 8 },
+        { x: 1240, y: 418, texture: 'poi_volcanic_extractor', label: '[POI] PYRA • CORE REACTOR', labelColor: '#ef4444', depth: 8 },
+        { x: 120, y: 402, texture: 'holo_sign' },
+        { x: 1280, y: 402, texture: 'pipe_station' }
+      ];
+    }
+    if (sector === 2) {
+      return [
+        { x: 160, y: 418, texture: 'poi_station_hangar', label: '[POI] CHIEF JAX • BATTLE DOCK', labelColor: '#facc15', depth: 8 },
+        { x: 1240, y: 418, texture: 'poi_station_cryolab', label: '[POI] DR. ARIS • CRYO-CHAMBER', labelColor: '#38bdf8', depth: 8 },
+        { x: 120, y: 402, texture: 'holo_sign' },
+        { x: 1280, y: 402, texture: 'pipe_station' }
+      ];
+    }
+    if (sector === 3) {
+      return [
+        { x: 160, y: 418, texture: 'poi_nebula_sanctuary', label: '[POI] ASTRAL SEER LUMEN • STAR CRADLE', labelColor: '#c084fc', depth: 8 },
+        { x: 1240, y: 418, texture: 'poi_nebula_siphon', label: '[POI] ZEPHYR • COSMIC SINK', labelColor: '#06b6d4', depth: 8 },
+        { x: 120, y: 402, texture: 'holo_sign' }
+      ];
+    }
+    if (sector === 5) {
+      return [
+        { x: 160, y: 418, texture: 'poi_ruins_vault', label: '[POI] ARCH-ARCHIVIST SOLON • OMEGA VAULT', labelColor: '#fde047', depth: 8 },
+        { x: 1240, y: 418, texture: 'poi_ruins_shrine', label: '[POI] AETHELGARD • TITAN SANCTUARY', labelColor: '#38bdf8', depth: 8 },
+        { x: 120, y: 402, texture: 'holo_sign' }
+      ];
+    }
+    return [
+      { x: 160, y: 418, texture: 'poi_frontier_uplink', label: '[POI] COMMANDER ORION • SECTOR DEFENSE', labelColor: '#38bdf8', depth: 8 },
+      { x: 1240, y: 418, texture: 'poi_frontier_nav', label: '[POI] NOVA • WARP NEXUS', labelColor: '#00f0ff', depth: 8 },
+      { x: 120, y: 402, texture: 'holo_sign' },
+      { x: 1280, y: 402, texture: 'pipe_station' }
+    ];
+  }
+
+  // Sublevels 2 through 9
+  if (sector === 6) {
+    return [
+      { x: 260, y: 418, texture: 'poi_sheriff_office', label: '[POI] SHERIFF WYATT • JAILHOUSE', labelColor: '#facc15', depth: 8 },
+      { x: 140, y: 418, texture: 'scenery_cactus_tall', depth: 7 },
+      { x: 380, y: 418, texture: 'scenery_cactus_small', depth: 7 },
+      { x: 420, y: 418, texture: 'scenery_wagon_wheel', depth: 9 },
+      { x: 460, y: 418, texture: 'scenery_skull', depth: 9 },
+      { x: Math.round(worldWidth * 0.45), y: 418, texture: 'poi_saloon', label: '[POI] BILLY THE KID • OUTLAW SALOON', labelColor: '#fb923c', depth: 8 },
+      { x: Math.round(worldWidth * 0.45) + 90, y: 418, texture: 'scenery_cactus_tall', depth: 7 },
+      { x: Math.round(worldWidth * 0.45) + 120, y: 418, texture: 'scenery_wagon_wheel', depth: 9 },
+      { x: Math.round(worldWidth * 0.72), y: 418, texture: 'poi_frontier_bank', label: '[POI] PROSPECTOR PETE • GOLD ASSAY', labelColor: '#fde047', depth: 8 },
+      { x: Math.round(worldWidth * 0.72) + 80, y: 418, texture: 'scenery_tumbleweed', drift: 90, depth: 9 },
+      { x: worldWidth - 220, y: 418, texture: 'scenery_cactus_tall', depth: 7 },
+      { x: 120, y: 402, texture: 'holo_sign' }
+    ];
+  }
+
+  if (sector === 4) {
+    return [
+      { x: 300, y: 418, texture: 'poi_volcanic_foundry', label: '[POI] FORGE-MASTER VULCAN • OBSIDIAN SMELTER', labelColor: '#f97316', depth: 8 },
+      { x: Math.round(worldWidth * 0.58), y: 270, texture: 'poi_volcanic_extractor', label: '[POI] PYRA • THERMAL EXTRACTOR', labelColor: '#ef4444', depth: 8 },
+      { x: 120, y: 402, texture: 'holo_sign' }
+    ];
+  }
+
+  if (sector === 2) {
+    return [
+      { x: 300, y: 418, texture: 'poi_station_hangar', label: '[POI] CHIEF JAX • TITAN MECHA BAY', labelColor: '#facc15', depth: 8 },
+      { x: Math.round(worldWidth * 0.62), y: 260, texture: 'poi_station_cryolab', label: '[POI] DR. ARIS • CYBER CRYO-LAB', labelColor: '#38bdf8', depth: 8 },
+      { x: 120, y: 402, texture: 'holo_sign' }
+    ];
+  }
+
+  if (sector === 3) {
+    return [
+      { x: 280, y: 418, texture: 'poi_nebula_sanctuary', label: '[POI] ASTRAL SEER LUMEN • VOID SANCTUARY', labelColor: '#c084fc', depth: 8 },
+      { x: Math.round(worldWidth * 0.6), y: 300, texture: 'poi_nebula_siphon', label: '[POI] ZEPHYR • RIFT SIPHON', labelColor: '#06b6d4', depth: 8 },
+      { x: 120, y: 402, texture: 'holo_sign' }
+    ];
+  }
+
+  if (sector === 5) {
+    return [
+      { x: 300, y: 418, texture: 'poi_ruins_vault', label: '[POI] ARCH-ARCHIVIST SOLON • CELESTIAL VAULT', labelColor: '#fde047', depth: 8 },
+      { x: Math.round(worldWidth * 0.65), y: 250, texture: 'poi_ruins_shrine', label: '[POI] AETHELGARD • TITAN SHRINE', labelColor: '#38bdf8', depth: 8 },
+      { x: 120, y: 402, texture: 'holo_sign' }
+    ];
+  }
+
+  return [
+    { x: 280, y: 418, texture: 'poi_frontier_uplink', label: '[POI] COMMANDER ORION • GATEWAY UPLINK', labelColor: '#38bdf8', depth: 8 },
+    { x: Math.round(worldWidth * 0.55), y: 250, texture: 'poi_frontier_nav', label: '[POI] NOVA • ASTRAL BEACON', labelColor: '#00f0ff', depth: 8 },
+    { x: 120, y: 402, texture: 'holo_sign' }
+  ];
+}
+
+/**
  * Generates Sublevel 10: The Dedicated Final Boss Arena for a sector
  * @param {number} sector 1 to 6
  * @returns {object} Boss level definition
@@ -153,10 +269,7 @@ export function createBossArenaData(sector = 1) {
     // No minion enemies in boss arena; the Boss is the sole encounter
     enemies: [],
 
-    decorations: [
-      { x: 120, y: 402, texture: 'holo_sign' },
-      { x: 1280, y: 402, texture: 'pipe_station' }
-    ]
+    decorations: createSectorDecorations(sector, 1400, 10, true)
   };
 }
 
@@ -298,9 +411,7 @@ export function createSubLevelData(sector = 1, subLevel = 2) {
     launchPads,
     hazardZones,
     energyGates,
-    decorations: [
-      { x: 120, y: 402, texture: 'holo_sign' }
-    ]
+    decorations: createSectorDecorations(sector, worldWidth, subLevel, false)
   };
 }
 

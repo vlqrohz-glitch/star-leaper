@@ -14,8 +14,9 @@ export class BootScene extends Phaser.Scene {
     // 2. Themed Environment Tilesets
     this.createPlatformTextures();
 
-    // 3. Multi-Layer Parallax Backgrounds
+    // 3. Multi-Layer Parallax Backgrounds & Sector Landmarks
     this.createParallaxTextures();
+    this.createSectorLandmarkTextures();
 
     // 4. Level Objects & Markers
     this.createGoalMarkerTexture();
@@ -32,8 +33,9 @@ export class BootScene extends Phaser.Scene {
     // 7. Interactive Mechanics & Hazards
     this.createMechanicsTextures();
 
-    // 8. Environmental Storytelling & Decor
+    // 8. Environmental Storytelling, Western Scenery & Thematic POIs
     this.createDecorTextures();
+    this.createSceneryAndPOITextures();
 
     // 9. Outfits, Pets & Shop Badges
     this.createOutfitTextures();
@@ -1737,5 +1739,807 @@ export class BootScene extends Phaser.Scene {
     kG.fillRect(28, 32, 5, 6);
     kG.generateTexture('boss_outlaw_king', 46, 46);
     kG.destroy();
+  }
+
+  /* -------------------------------------------------------------
+     10. SECTOR BACKGROUND LANDMARK FIGURES (MAJESTIC BACKGROUND VISTAS)
+     ------------------------------------------------------------- */
+  createSectorLandmarkTextures() {
+    // 1. Sector 1: Colossal Orion Stargate & Orbital Gateway (320x200)
+    const s1G = this.make.graphics({ x: 0, y: 0, add: false });
+    // Outer Dark Metal Ring Structure
+    s1G.fillStyle(0x0f172a, 0.9);
+    s1G.fillCircle(160, 100, 84);
+    s1G.fillStyle(0x1e293b, 1);
+    s1G.fillCircle(160, 100, 80);
+    s1G.lineStyle(3, 0x334155, 1);
+    s1G.strokeCircle(160, 100, 80);
+    // Glowing Cyan Inner Stargate Conduit Ring
+    s1G.lineStyle(4, 0x00f0ff, 0.95);
+    s1G.strokeCircle(160, 100, 62);
+    s1G.lineStyle(2, 0x7dd3fc, 0.8);
+    s1G.strokeCircle(160, 100, 56);
+    // Swirling Celestial Event Horizon Portal Core
+    s1G.fillStyle(0x0369a1, 0.7);
+    s1G.fillCircle(160, 100, 54);
+    s1G.fillStyle(0x0284c7, 0.85);
+    s1G.fillCircle(160, 100, 42);
+    s1G.fillStyle(0x38bdf8, 0.95);
+    s1G.fillCircle(160, 100, 26);
+    s1G.fillStyle(0xffffff, 1);
+    s1G.fillCircle(160, 100, 12);
+    // 4 Diagonal Hyperdrive Stabilizer Pylons
+    const pylonAngles = [Math.PI * 0.25, Math.PI * 0.75, Math.PI * 1.25, Math.PI * 1.75];
+    pylonAngles.forEach(ang => {
+      const cx = 160 + Math.cos(ang) * 80;
+      const cy = 100 + Math.sin(ang) * 80;
+      const ex = 160 + Math.cos(ang) * 115;
+      const ey = 100 + Math.sin(ang) * 115;
+      s1G.lineStyle(6, 0x1e293b, 1);
+      s1G.lineBetween(cx, cy, ex, ey);
+      s1G.lineStyle(2, 0xf59e0b, 1);
+      s1G.lineBetween(cx, cy, ex, ey);
+      // Pylon Tip Energy Emitter
+      s1G.fillStyle(0x00f0ff, 1);
+      s1G.fillCircle(ex, ey, 4);
+    });
+    // Solar Array Wings Left & Right
+    s1G.fillStyle(0x0284c7, 0.8);
+    s1G.fillRect(20, 88, 48, 24);
+    s1G.fillRect(252, 88, 48, 24);
+    s1G.lineStyle(1, 0x7dd3fc, 0.9);
+    s1G.strokeRect(20, 88, 48, 24);
+    s1G.strokeRect(252, 88, 48, 24);
+    s1G.generateTexture('bg_landmark_frontier', 320, 200);
+    s1G.destroy();
+
+    // 2. Sector 2: Moonfall Station Orbital Ring & Shattered Lunar Eclipse (320x200)
+    const s2G = this.make.graphics({ x: 0, y: 0, add: false });
+    // Distant Shattered Moon Crescent
+    s2G.fillStyle(0x64748b, 0.85);
+    s2G.fillCircle(160, 95, 62);
+    s2G.fillStyle(0x070a14, 1); // Shadow eclipse bite
+    s2G.fillCircle(142, 88, 54);
+    // Lunar Craters & Neon Fractures
+    s2G.fillStyle(0x475569, 0.9);
+    s2G.fillCircle(182, 75, 9);
+    s2G.fillCircle(195, 110, 14);
+    s2G.fillCircle(172, 130, 8);
+    // Glowing cyan cybernetic fracture lines across moon
+    s2G.lineStyle(1.5, 0x38bdf8, 0.9);
+    s2G.lineBetween(170, 70, 185, 95);
+    s2G.lineBetween(185, 95, 205, 115);
+    // Mega-Station Orbital Ring Clamping the Moon
+    s2G.lineStyle(14, 0x0f172a, 0.95);
+    s2G.strokeEllipse(160, 100, 145, 45);
+    s2G.lineStyle(8, 0x1e293b, 1);
+    s2G.strokeEllipse(160, 100, 145, 45);
+    s2G.lineStyle(2, 0x38bdf8, 1);
+    s2G.strokeEllipse(160, 100, 145, 45);
+    // Docking Gantry Bays & Illuminated Windows
+    s2G.fillStyle(0xfacc15, 0.9);
+    for (let w = 0; w < 12; w++) {
+      const wx = 35 + w * 22;
+      const wy = 100 + Math.sin(w * 0.5) * 8;
+      s2G.fillRect(wx, wy - 1, 4, 3);
+    }
+    // Communication Spire with Blinking Beacons
+    s2G.lineStyle(2, 0x94a3b8, 1);
+    s2G.lineBetween(160, 50, 160, 15);
+    s2G.fillStyle(0xef4444, 1);
+    s2G.fillCircle(160, 15, 3);
+    s2G.generateTexture('bg_landmark_station', 320, 200);
+    s2G.destroy();
+
+    // 3. Sector 3: Celestial Void Leviathan (Cosmic Star-Serpent) (320x200)
+    const s3G = this.make.graphics({ x: 0, y: 0, add: false });
+    // Cosmic Leviathan Undulating Body S-Curve
+    const spinePoints = [
+      { x: 30, y: 130, r: 8 },
+      { x: 65, y: 90, r: 12 },
+      { x: 105, y: 65, r: 16 },
+      { x: 150, y: 80, r: 20 },
+      { x: 195, y: 115, r: 22 },
+      { x: 240, y: 110, r: 19 },
+      { x: 275, y: 85, r: 14 }
+    ];
+    // Leviathan Outer Shadow
+    spinePoints.forEach(pt => {
+      s3G.fillStyle(0x2e1065, 0.85);
+      s3G.fillCircle(pt.x, pt.y, pt.r + 4);
+    });
+    // Leviathan Deep Indigo Body Segments
+    spinePoints.forEach((pt, i) => {
+      const col = (i % 2 === 0) ? 0x3b0764 : 0x4c1d95;
+      s3G.fillStyle(col, 1);
+      s3G.fillCircle(pt.x, pt.y, pt.r);
+      // Iridescent Scale Highlights
+      s3G.fillStyle(0xa855f7, 0.9);
+      s3G.fillCircle(pt.x - 2, pt.y - 2, pt.r * 0.55);
+      s3G.fillStyle(0x06b6d4, 0.85);
+      s3G.fillCircle(pt.x + 1, pt.y + 1, pt.r * 0.3);
+    });
+    // Bioluminescent Dorsal Star-Spines
+    spinePoints.forEach((pt, i) => {
+      if (i > 0 && i < spinePoints.length - 1) {
+        s3G.lineStyle(3, 0x67e8f9, 0.9);
+        s3G.lineBetween(pt.x, pt.y - pt.r, pt.x + 5, pt.y - pt.r - 16);
+        s3G.fillStyle(0xffffff, 1);
+        s3G.fillCircle(pt.x + 5, pt.y - pt.r - 16, 2.5);
+      }
+    });
+    // Leviathan Celestial Dragon Head (at x=275, y=85)
+    s3G.fillStyle(0x4c1d95, 1);
+    s3G.fillRoundedRect(270, 72, 34, 26, 6);
+    // Horned Crest
+    s3G.lineStyle(3, 0xc084fc, 1);
+    s3G.lineBetween(285, 72, 305, 52);
+    s3G.lineBetween(292, 72, 314, 60);
+    // Glowing Cyan Celestial Eye
+    s3G.fillStyle(0x00f0ff, 1);
+    s3G.fillCircle(292, 82, 4);
+    s3G.fillStyle(0xffffff, 1);
+    s3G.fillCircle(292, 82, 1.5);
+    // Astral Whiskers / Energy Tendrils
+    s3G.lineStyle(1.5, 0x38bdf8, 0.8);
+    s3G.lineBetween(304, 88, 318, 98);
+    s3G.lineBetween(302, 92, 316, 106);
+    s3G.generateTexture('bg_landmark_nebula', 320, 200);
+    s3G.destroy();
+
+    // 4. Sector 4: Mount Ignis - Towering Erupting Volcano (340x240)
+    // Pure visual landmark in background with zero gameplay impact!
+    const s4G = this.make.graphics({ x: 0, y: 0, add: false });
+    // Massive Craggy Basalt Mountain Slope
+    s4G.fillStyle(0x18181b, 0.95);
+    s4G.beginPath();
+    s4G.moveTo(20, 240);
+    s4G.lineTo(90, 180);
+    s4G.lineTo(135, 120);
+    s4G.lineTo(155, 110);
+    s4G.lineTo(185, 110);
+    s4G.lineTo(205, 120);
+    s4G.lineTo(255, 180);
+    s4G.lineTo(320, 240);
+    s4G.closePath();
+    s4G.fillPath();
+
+    // Jagged Mountain Ridge Highlights
+    s4G.fillStyle(0x27272a, 1);
+    s4G.beginPath();
+    s4G.moveTo(145, 110);
+    s4G.lineTo(120, 160);
+    s4G.lineTo(80, 240);
+    s4G.lineTo(110, 240);
+    s4G.lineTo(150, 160);
+    s4G.lineTo(170, 110);
+    s4G.closePath();
+    s4G.fillPath();
+
+    // Glowing Cascading Rivers of Molten Lava
+    s4G.lineStyle(3, 0xef4444, 0.95);
+    s4G.lineBetween(160, 110, 150, 145);
+    s4G.lineBetween(150, 145, 165, 185);
+    s4G.lineBetween(165, 185, 145, 240);
+
+    s4G.lineStyle(2, 0xf97316, 1);
+    s4G.lineBetween(175, 110, 185, 150);
+    s4G.lineBetween(185, 150, 175, 190);
+    s4G.lineBetween(175, 190, 210, 240);
+
+    s4G.lineStyle(1.5, 0xfacc15, 1);
+    s4G.lineBetween(161, 112, 151, 145);
+    s4G.lineBetween(176, 112, 184, 150);
+
+    // Molten Lava Caldera at the Peak
+    s4G.fillStyle(0xdc2626, 1);
+    s4G.fillEllipse(170, 110, 36, 12);
+    s4G.fillStyle(0xf97316, 1);
+    s4G.fillEllipse(170, 110, 26, 8);
+    s4G.fillStyle(0xfef08a, 1);
+    s4G.fillEllipse(170, 110, 14, 4);
+
+    // Billowing Volcanic Ash & Smoke Eruption Plume (Expanding upward)
+    const smokePuffs = [
+      { x: 170, y: 92, r: 16, col: 0x451a03, a: 0.8 },
+      { x: 155, y: 74, r: 24, col: 0x3f3f46, a: 0.85 },
+      { x: 185, y: 68, r: 26, col: 0x27272a, a: 0.9 },
+      { x: 140, y: 48, r: 32, col: 0x3f3f46, a: 0.85 },
+      { x: 180, y: 40, r: 36, col: 0x52525b, a: 0.8 },
+      { x: 215, y: 44, r: 30, col: 0x3f3f46, a: 0.85 },
+      { x: 160, y: 22, r: 38, col: 0x71717a, a: 0.75 },
+      { x: 195, y: 18, r: 40, col: 0x52525b, a: 0.7 }
+    ];
+    smokePuffs.forEach(p => {
+      s4G.fillStyle(p.col, p.a);
+      s4G.fillCircle(p.x, p.y, p.r);
+    });
+
+    // Fiery Magma Blast Column Erupting Inside the Smoke
+    s4G.fillStyle(0xef4444, 0.9);
+    s4G.fillTriangle(155, 110, 185, 110, 170, 45);
+    s4G.fillStyle(0xf97316, 0.95);
+    s4G.fillTriangle(160, 110, 180, 110, 170, 55);
+    s4G.fillStyle(0xfff066, 1);
+    s4G.fillTriangle(164, 110, 176, 110, 170, 70);
+
+    // Ejected Fiery Volcanic Sparks in the Sky
+    const sparks = [
+      { x: 135, y: 55 }, { x: 205, y: 58 }, { x: 150, y: 35 },
+      { x: 190, y: 28 }, { x: 120, y: 80 }, { x: 220, y: 75 }
+    ];
+    sparks.forEach(sp => {
+      s4G.fillStyle(0xfacc15, 1);
+      s4G.fillCircle(sp.x, sp.y, 2.5);
+      s4G.fillStyle(0xffffff, 1);
+      s4G.fillCircle(sp.x, sp.y, 1);
+    });
+    s4G.generateTexture('bg_landmark_volcano', 340, 240);
+    s4G.destroy();
+
+    // Dedicated Volcanic Ember Particle (6x6)
+    const emberG = this.make.graphics({ x: 0, y: 0, add: false });
+    emberG.fillStyle(0xff4500, 0.4);
+    emberG.fillCircle(3, 3, 3);
+    emberG.fillStyle(0xf97316, 0.85);
+    emberG.fillCircle(3, 3, 2);
+    emberG.fillStyle(0xfff066, 1);
+    emberG.fillCircle(3, 3, 1);
+    emberG.generateTexture('particle_ember', 6, 6);
+    emberG.destroy();
+
+    // 5. Sector 5: Ancient Celestial Titan Colossus & Floating Citadel (320x220)
+    const s5G = this.make.graphics({ x: 0, y: 0, add: false });
+    // Triple Radiant Celestial Halo Behind Colossus
+    s5G.lineStyle(3, 0xfde047, 0.5);
+    s5G.strokeCircle(160, 90, 72);
+    s5G.lineStyle(2, 0x38bdf8, 0.7);
+    s5G.strokeCircle(160, 90, 58);
+    s5G.lineStyle(1.5, 0xfacc15, 0.85);
+    s5G.strokeCircle(160, 90, 44);
+
+    // Colossal Stone & Gold Ancient Titan Torso & Shoulders
+    s5G.fillStyle(0x0f172a, 0.95);
+    s5G.fillRect(110, 110, 100, 110);
+    s5G.fillStyle(0x1e293b, 1);
+    s5G.fillRect(114, 114, 92, 106);
+    // Gold Celestial Pauldrons & Armor Inlays
+    s5G.fillStyle(0xf59e0b, 1);
+    s5G.fillRect(96, 112, 32, 24);
+    s5G.fillRect(192, 112, 32, 24);
+    s5G.fillRect(145, 140, 30, 6);
+    // Glowing Runic Celestial Chest Core
+    s5G.fillStyle(0x00f0ff, 0.9);
+    s5G.fillCircle(160, 160, 14);
+    s5G.fillStyle(0xffffff, 1);
+    s5G.fillCircle(160, 160, 6);
+
+    // Titan Helmet & Noble Carved Visage
+    s5G.fillStyle(0x334155, 1);
+    s5G.fillRoundedRect(142, 60, 36, 48, 6);
+    s5G.fillStyle(0xf59e0b, 1);
+    s5G.fillRect(140, 56, 40, 8); // Golden Crown Diadem
+    // Glowing Blue Celestial Eyes
+    s5G.fillStyle(0x00f0ff, 1);
+    s5G.fillRect(148, 76, 7, 3);
+    s5G.fillRect(165, 76, 7, 3);
+
+    // Floating Anti-Gravity Crystal Palaces & Golden Spires Left & Right
+    s5G.fillStyle(0x1e293b, 0.9);
+    s5G.fillRect(35, 120, 42, 70);
+    s5G.fillRect(245, 115, 46, 75);
+    s5G.fillStyle(0xf59e0b, 1);
+    s5G.fillTriangle(35, 120, 77, 120, 56, 85);
+    s5G.fillTriangle(245, 115, 291, 115, 268, 78);
+    // Floating Power Crystals
+    s5G.fillStyle(0x38bdf8, 0.9);
+    s5G.fillCircle(56, 68, 8);
+    s5G.fillCircle(268, 62, 8);
+    s5G.generateTexture('bg_landmark_ruins', 320, 220);
+    s5G.destroy();
+
+    // 6. Sector 6: Monument Valley Red Rock Mesas & Sunset Arch (340x220)
+    const s6G = this.make.graphics({ x: 0, y: 0, add: false });
+    // Blazing Western Sunset Sky Gradient (Rich Desert Warmth)
+    const sunsetBands = [
+      { y: 0, h: 45, col: 0x7f1d1d, a: 0.8 },
+      { y: 45, h: 45, col: 0x9a3412, a: 0.85 },
+      { y: 90, h: 45, col: 0xc2410c, a: 0.9 },
+      { y: 135, h: 45, col: 0xd97706, a: 0.95 },
+      { y: 180, h: 40, col: 0xf59e0b, a: 1.0 }
+    ];
+    sunsetBands.forEach(b => {
+      s6G.fillStyle(b.col, b.a);
+      s6G.fillRect(0, b.y, 340, b.h);
+    });
+
+    // Sun Setting Low on Horizon
+    s6G.fillStyle(0xfef08a, 0.9);
+    s6G.fillCircle(170, 150, 36);
+    s6G.fillStyle(0xffffff, 0.95);
+    s6G.fillCircle(170, 150, 22);
+
+    // Red Rock Sandstone Arch & Buttes Silhouette
+    s6G.fillStyle(0x451a03, 0.95);
+    // Left Sandstone Mesa Butte (Mitten Butte)
+    s6G.beginPath();
+    s6G.moveTo(20, 220);
+    s6G.lineTo(45, 140);
+    s6G.lineTo(55, 115);
+    s6G.lineTo(95, 115);
+    s6G.lineTo(105, 140);
+    s6G.lineTo(130, 220);
+    s6G.closePath();
+    s6G.fillPath();
+
+    // Right Towering Sandstone Butte
+    s6G.beginPath();
+    s6G.moveTo(215, 220);
+    s6G.lineTo(235, 130);
+    s6G.lineTo(245, 105);
+    s6G.lineTo(285, 105);
+    s6G.lineTo(295, 130);
+    s6G.lineTo(325, 220);
+    s6G.closePath();
+    s6G.fillPath();
+
+    // Colossal Natural Sandstone Arch Spanning Horizon
+    s6G.lineStyle(16, 0x7c2d12, 1);
+    s6G.strokeEllipse(170, 190, 100, 75);
+    s6G.lineStyle(4, 0x9a3412, 1);
+    s6G.strokeEllipse(170, 190, 100, 75);
+
+    // Silhouette Eagles Soaring in Desert Sky
+    const eagles = [{ x: 120, y: 70 }, { x: 225, y: 55 }, { x: 160, y: 40 }];
+    eagles.forEach(eg => {
+      s6G.lineStyle(2, 0x292524, 0.85);
+      s6G.beginPath();
+      s6G.moveTo(eg.x - 7, eg.y + 2);
+      s6G.lineTo(eg.x, eg.y);
+      s6G.lineTo(eg.x + 7, eg.y + 2);
+      s6G.strokePath();
+    });
+    s6G.generateTexture('bg_landmark_desert', 340, 220);
+    s6G.destroy();
+  }
+
+  /* -------------------------------------------------------------
+     11. WILD WEST COWBOY SCENERY & CHARACTER THEMED POI TEXTURES
+     ------------------------------------------------------------- */
+  createSceneryAndPOITextures() {
+    // -----------------------------------------------------------
+    // WILD WEST COWBOY COUNTRY ASSETS (SECTOR 6)
+    // -----------------------------------------------------------
+
+    // 1. Tall Multi-Armed Saguaro Cactus (32x56)
+    const cTall = this.make.graphics({ x: 0, y: 0, add: false });
+    // Main ribbed trunk
+    cTall.fillStyle(0x14532d, 1);
+    cTall.fillRoundedRect(11, 4, 10, 52, 4);
+    cTall.fillStyle(0x15803d, 1);
+    cTall.fillRoundedRect(12, 4, 8, 52, 3);
+    // Vertical spine ribs
+    cTall.fillStyle(0x166534, 1);
+    cTall.fillRect(14, 6, 2, 48);
+    cTall.fillRect(18, 6, 2, 48);
+    // Left Branching Arm
+    cTall.fillStyle(0x15803d, 1);
+    cTall.fillRect(3, 24, 10, 6);
+    cTall.fillRoundedRect(3, 14, 6, 16, 3);
+    // Right Branching Arm
+    cTall.fillStyle(0x15803d, 1);
+    cTall.fillRect(19, 18, 10, 6);
+    cTall.fillRoundedRect(23, 8, 6, 16, 3);
+    // Sharp Desert Spines
+    cTall.fillStyle(0xfef08a, 1);
+    cTall.fillRect(2, 18, 2, 2);
+    cTall.fillRect(28, 12, 2, 2);
+    cTall.fillRect(10, 10, 2, 2);
+    cTall.fillRect(20, 30, 2, 2);
+    // Pink Desert Flower Blossom at Top
+    cTall.fillStyle(0xf43f5e, 1);
+    cTall.fillCircle(16, 4, 3);
+    cTall.fillStyle(0xfef08a, 1);
+    cTall.fillCircle(16, 4, 1.2);
+    cTall.generateTexture('scenery_cactus_tall', 32, 56);
+    cTall.destroy();
+
+    // 2. Prickly Pear Cactus Cluster (28x28)
+    const cSmall = this.make.graphics({ x: 0, y: 0, add: false });
+    cSmall.fillStyle(0x15803d, 1);
+    cSmall.fillEllipse(14, 20, 18, 14);
+    cSmall.fillEllipse(8, 12, 12, 14);
+    cSmall.fillEllipse(20, 13, 12, 14);
+    cSmall.fillStyle(0x16a34a, 1);
+    cSmall.fillEllipse(14, 20, 14, 10);
+    cSmall.fillEllipse(8, 12, 9, 10);
+    cSmall.fillEllipse(20, 13, 9, 10);
+    // Pink desert blossoms
+    cSmall.fillStyle(0xf43f5e, 1);
+    cSmall.fillCircle(8, 5, 2.5);
+    cSmall.fillCircle(20, 6, 2.5);
+    cSmall.generateTexture('scenery_cactus_small', 28, 28);
+    cSmall.destroy();
+
+    // 3. Sheriff Wyatt's Office & Jailhouse (100x84)
+    const sherG = this.make.graphics({ x: 0, y: 0, add: false });
+    // Heavy timber building base
+    sherG.fillStyle(0x451a03, 1);
+    sherG.fillRect(4, 18, 92, 66);
+    // Horizontal weathered wood planks
+    for (let p = 0; p < 8; p++) {
+      const col = (p % 2 === 0) ? 0x78350f : 0x92400e;
+      sherG.fillStyle(col, 1);
+      sherG.fillRect(6, 22 + p * 7, 88, 6);
+    }
+    // Wooden Porch Awning with rustic shingles
+    sherG.fillStyle(0x571e06, 1);
+    sherG.fillRect(2, 14, 96, 8);
+    sherG.fillStyle(0x78350f, 1);
+    sherG.fillRect(4, 16, 92, 4);
+    // Porch Support Pillars
+    sherG.fillStyle(0x451a03, 1);
+    sherG.fillRect(8, 22, 5, 62);
+    sherG.fillRect(87, 22, 5, 62);
+    // Sheriff Wooden Door
+    sherG.fillStyle(0x291503, 1);
+    sherG.fillRect(38, 42, 24, 42);
+    sherG.fillStyle(0x571e06, 1);
+    sherG.fillRect(40, 44, 20, 40);
+    sherG.fillStyle(0xfacc15, 1); // Brass doorknob
+    sherG.fillCircle(43, 64, 2);
+
+    // Weathered Wood Signboard: "SHERIFF"
+    sherG.fillStyle(0xd97706, 1);
+    sherG.fillRect(24, 2, 52, 14);
+    sherG.lineStyle(1.5, 0x451a03, 1);
+    sherG.strokeRect(24, 2, 52, 14);
+    // 6-Point Golden Star Badge
+    sherG.fillStyle(0xfacc15, 1);
+    sherG.fillCircle(50, 9, 5);
+    sherG.fillStyle(0xffffff, 1);
+    sherG.fillCircle(50, 9, 2);
+    // Text Line Simulators for "SHERIFF"
+    sherG.fillStyle(0x451a03, 1);
+    sherG.fillRect(28, 7, 16, 4);
+    sherG.fillRect(56, 7, 16, 4);
+
+    // Barred Iron Jail Cell Window (Right Side)
+    sherG.fillStyle(0x0f172a, 1);
+    sherG.fillRect(68, 44, 20, 20);
+    sherG.lineStyle(2, 0x475569, 1);
+    sherG.strokeRect(68, 44, 20, 20);
+    // Iron Window Bars
+    sherG.lineStyle(2, 0x94a3b8, 1);
+    sherG.lineBetween(73, 44, 73, 64);
+    sherG.lineBetween(78, 44, 78, 64);
+    sherG.lineBetween(83, 44, 83, 64);
+    // Brass Hanging Porch Lantern
+    sherG.fillStyle(0xfacc15, 0.9);
+    sherG.fillRect(15, 30, 4, 6);
+    sherG.fillStyle(0x451a03, 1);
+    sherG.fillRect(14, 28, 6, 2);
+    sherG.generateTexture('poi_sheriff_office', 100, 84);
+    sherG.destroy();
+
+    // 4. Billy the Kid's Outlaw Saloon (112x96)
+    const salG = this.make.graphics({ x: 0, y: 0, add: false });
+    // 2-Story Wooden Saloon Structure
+    salG.fillStyle(0x451a03, 1);
+    salG.fillRect(4, 18, 104, 78);
+    // Wooden Planking
+    for (let p = 0; p < 10; p++) {
+      const col = (p % 2 === 0) ? 0x78350f : 0x92400e;
+      salG.fillStyle(col, 1);
+      salG.fillRect(6, 20 + p * 7.5, 100, 6.5);
+    }
+    // Decorative False-Front Gable at Summit
+    salG.fillStyle(0x571e06, 1);
+    salG.fillRect(12, 4, 88, 16);
+    salG.fillStyle(0xd97706, 1);
+    salG.fillRect(20, 8, 72, 10);
+    // "SALOON" Signboard
+    salG.fillStyle(0x291503, 1);
+    salG.fillRect(24, 10, 64, 6);
+    salG.fillStyle(0xfacc15, 1);
+    salG.fillRect(28, 12, 56, 2); // Gold lettering bar
+
+    // 2nd Floor Balcony with Railings
+    salG.fillStyle(0x361302, 1);
+    salG.fillRect(6, 52, 100, 5);
+    salG.lineStyle(1.5, 0x92400e, 1);
+    for (let r = 0; r < 14; r++) {
+      salG.lineBetween(10 + r * 7, 44, 10 + r * 7, 52);
+    }
+    // 2nd Floor Lighted Windows
+    salG.fillStyle(0xfef08a, 0.9);
+    salG.fillRect(22, 30, 16, 14);
+    salG.fillRect(74, 30, 16, 14);
+    salG.lineStyle(1, 0x451a03, 1);
+    salG.strokeRect(22, 30, 16, 14);
+    salG.strokeRect(74, 30, 16, 14);
+
+    // 1st Floor Swinging Louver Batwing Doors
+    salG.fillStyle(0x1c1917, 1);
+    salG.fillRect(44, 64, 24, 32);
+    salG.fillStyle(0xb45309, 1);
+    salG.fillRect(44, 68, 11, 20); // Left Batwing Door
+    salG.fillRect(57, 68, 11, 20); // Right Batwing Door
+    salG.fillStyle(0xd97706, 1);
+    salG.fillRect(46, 72, 7, 12);
+    salG.fillRect(59, 72, 7, 12);
+
+    // Front Wooden Hitching Rail
+    salG.fillStyle(0x451a03, 1);
+    salG.fillRect(2, 88, 108, 4);
+    salG.fillRect(8, 88, 4, 8);
+    salG.fillRect(100, 88, 4, 8);
+    salG.generateTexture('poi_saloon', 112, 96);
+    salG.destroy();
+
+    // 5. Frontier Assay & Bank (90x80)
+    const bankG = this.make.graphics({ x: 0, y: 0, add: false });
+    bankG.fillStyle(0x451a03, 1);
+    bankG.fillRect(4, 16, 82, 64);
+    for (let p = 0; p < 8; p++) {
+      bankG.fillStyle((p % 2 === 0) ? 0x78350f : 0x854d0e, 1);
+      bankG.fillRect(6, 18 + p * 7.5, 78, 6.5);
+    }
+    // "BANK & ASSAY" Sign
+    bankG.fillStyle(0x1e3a8a, 1);
+    bankG.fillRect(12, 4, 66, 12);
+    bankG.fillStyle(0xfacc15, 1);
+    bankG.fillRect(16, 7, 58, 6);
+    // Gold Scales Balance Icon
+    bankG.fillStyle(0xfef08a, 1);
+    bankG.fillCircle(45, 10, 3);
+    // Security Vault Grated Window
+    bankG.fillStyle(0x0f172a, 1);
+    bankG.fillRect(16, 38, 18, 18);
+    bankG.lineStyle(2, 0xfacc15, 1);
+    bankG.strokeRect(16, 38, 18, 18);
+    // Heavy Door
+    bankG.fillStyle(0x1c1917, 1);
+    bankG.fillRect(50, 42, 22, 38);
+    // Whiskey Barrels on Porch
+    bankG.fillStyle(0x78350f, 1);
+    bankG.fillRoundedRect(74, 62, 12, 16, 3);
+    bankG.fillStyle(0x1c1917, 1);
+    bankG.fillRect(74, 66, 12, 2);
+    bankG.fillRect(74, 72, 12, 2);
+    bankG.generateTexture('poi_frontier_bank', 90, 80);
+    bankG.destroy();
+
+    // 6. Spoked Wooden Wagon Wheel (26x26)
+    const wG = this.make.graphics({ x: 0, y: 0, add: false });
+    wG.fillStyle(0x334155, 1);
+    wG.fillCircle(13, 13, 12);
+    wG.fillStyle(0x78350f, 1);
+    wG.fillCircle(13, 13, 10.5);
+    wG.fillStyle(0x000000, 0);
+    wG.fillRect(0, 0, 26, 26);
+    // Hub
+    wG.fillStyle(0x334155, 1);
+    wG.fillCircle(13, 13, 4);
+    wG.fillStyle(0xfacc15, 1);
+    wG.fillCircle(13, 13, 2);
+    // 8 Spokes
+    wG.lineStyle(1.5, 0x92400e, 1);
+    for (let s = 0; s < 8; s++) {
+      const ang = s * (Math.PI / 4);
+      wG.lineBetween(13, 13, 13 + Math.cos(ang) * 10, 13 + Math.sin(ang) * 10);
+    }
+    wG.generateTexture('scenery_wagon_wheel', 26, 26);
+    wG.destroy();
+
+    // 7. Desert Steer Skull (22x18)
+    const skG = this.make.graphics({ x: 0, y: 0, add: false });
+    // Ivory skull cranium
+    skG.fillStyle(0xf5f5f4, 1);
+    skG.fillRoundedRect(7, 5, 8, 11, 2);
+    skG.fillStyle(0xe7e5e4, 1);
+    skG.fillRect(9, 10, 4, 6);
+    // Dark Eye Sockets
+    skG.fillStyle(0x292524, 1);
+    skG.fillRect(8, 7, 2, 3);
+    skG.fillRect(12, 7, 2, 3);
+    // Sweeping Long Horns
+    skG.lineStyle(2.5, 0xd6d3d1, 1);
+    skG.beginPath();
+    skG.moveTo(1, 3);
+    skG.lineTo(7, 6);
+    skG.moveTo(21, 3);
+    skG.lineTo(15, 6);
+    skG.strokePath();
+    // Dark Horn Tips
+    skG.fillStyle(0x78350f, 1);
+    skG.fillCircle(1, 3, 1.5);
+    skG.fillCircle(21, 3, 1.5);
+    skG.generateTexture('scenery_skull', 22, 18);
+    skG.destroy();
+
+    // 8. Tumbleweed Bush (18x18)
+    const twG = this.make.graphics({ x: 0, y: 0, add: false });
+    twG.lineStyle(1.5, 0xa16207, 0.9);
+    twG.strokeCircle(9, 9, 7);
+    twG.lineStyle(1, 0xca8a04, 0.8);
+    twG.lineBetween(4, 9, 14, 9);
+    twG.lineBetween(9, 4, 9, 14);
+    twG.lineBetween(5, 5, 13, 13);
+    twG.lineBetween(5, 13, 13, 5);
+    twG.generateTexture('scenery_tumbleweed', 18, 18);
+    twG.destroy();
+
+    // -----------------------------------------------------------
+    // THEMED CHARACTER POIS FOR ALL SECTORS
+    // -----------------------------------------------------------
+
+    // Sector 1: Commander Orion's Stargate Uplink (64x64)
+    const oG = this.make.graphics({ x: 0, y: 0, add: false });
+    oG.fillStyle(0x0f172a, 1);
+    oG.fillRoundedRect(16, 28, 32, 34, 4);
+    oG.fillStyle(0x1e293b, 1);
+    oG.fillRect(20, 32, 24, 26);
+    // Spinning holographic globe / comm ring
+    oG.lineStyle(2, 0x00f0ff, 0.9);
+    oG.strokeCircle(32, 16, 12);
+    oG.lineStyle(1, 0x38bdf8, 0.7);
+    oG.strokeEllipse(32, 16, 12, 4);
+    oG.fillStyle(0xffffff, 1);
+    oG.fillCircle(32, 16, 3);
+    // Uplink Mast
+    oG.fillStyle(0x00f0ff, 1);
+    oG.fillRect(30, 24, 4, 6);
+    oG.generateTexture('poi_frontier_uplink', 64, 64);
+    oG.destroy();
+
+    // Sector 1: Star-Cartographer Nova's Astral Nav Beacon (56x56)
+    const nG = this.make.graphics({ x: 0, y: 0, add: false });
+    nG.fillStyle(0x1e293b, 1);
+    nG.fillRect(22, 24, 12, 30);
+    nG.fillStyle(0x0284c7, 1);
+    nG.fillCircle(28, 18, 14);
+    nG.fillStyle(0x00f0ff, 1);
+    nG.fillCircle(28, 18, 8);
+    nG.fillStyle(0xffffff, 1);
+    nG.fillCircle(28, 18, 3);
+    nG.generateTexture('poi_frontier_nav', 56, 56);
+    nG.destroy();
+
+    // Sector 2: Chief Jax's Mecha Hangar (72x64)
+    const jG = this.make.graphics({ x: 0, y: 0, add: false });
+    jG.fillStyle(0x0f172a, 1);
+    jG.fillRect(8, 14, 56, 48);
+    jG.fillStyle(0x334155, 1);
+    jG.fillRect(12, 18, 48, 40);
+    // Yellow & Black Hazard Caution Stripes
+    for (let c = 0; c < 5; c++) {
+      jG.fillStyle(0xfacc15, 1);
+      jG.fillRect(16 + c * 8, 54, 4, 4);
+    }
+    // Heavy Robotic Repair Arm
+    jG.lineStyle(3, 0x94a3b8, 1);
+    jG.lineBetween(36, 18, 36, 32);
+    jG.lineBetween(36, 32, 48, 38);
+    jG.fillStyle(0x38bdf8, 1);
+    jG.fillCircle(48, 38, 3.5);
+    jG.generateTexture('poi_station_hangar', 72, 64);
+    jG.destroy();
+
+    // Sector 2: Dr. Aris's Cybernetic Cryo-Lab (64x64)
+    const aG = this.make.graphics({ x: 0, y: 0, add: false });
+    aG.fillStyle(0x1e293b, 1);
+    aG.fillRoundedRect(18, 10, 28, 52, 6);
+    // Glass Cryo Chamber with Glowing Cyan Fluid
+    aG.fillStyle(0x0284c7, 0.85);
+    aG.fillRect(22, 16, 20, 36);
+    aG.fillStyle(0x38bdf8, 0.95);
+    aG.fillRect(24, 20, 16, 28);
+    aG.fillStyle(0xffffff, 1);
+    aG.fillCircle(32, 34, 4); // Floating bio-sample
+    aG.generateTexture('poi_station_cryolab', 64, 64);
+    aG.destroy();
+
+    // Sector 3: Astral Seer Lumen's Void Sanctuary (64x72)
+    const lG = this.make.graphics({ x: 0, y: 0, add: false });
+    // Obsidian Monolith
+    lG.fillStyle(0x2e1065, 1);
+    lG.fillTriangle(32, 6, 12, 66, 52, 66);
+    lG.fillStyle(0x3b0764, 1);
+    lG.fillTriangle(32, 10, 16, 64, 48, 64);
+    // Glowing Runic Symbols & Floating Crystals
+    lG.fillStyle(0xc084fc, 1);
+    lG.fillRect(30, 26, 4, 14);
+    lG.fillRect(28, 44, 8, 4);
+    lG.fillStyle(0x06b6d4, 1);
+    lG.fillCircle(14, 30, 4);
+    lG.fillCircle(50, 30, 4);
+    lG.generateTexture('poi_nebula_sanctuary', 64, 72);
+    lG.destroy();
+
+    // Sector 3: Cosmic Shaman Zephyr's Rift Siphon (56x64)
+    const zG = this.make.graphics({ x: 0, y: 0, add: false });
+    zG.fillStyle(0x3b0764, 1);
+    zG.fillRect(22, 30, 12, 32);
+    // Glowing Spiral Vortex Funnel
+    zG.lineStyle(2, 0xd946ef, 0.9);
+    zG.strokeCircle(28, 18, 14);
+    zG.lineStyle(1.5, 0x06b6d4, 0.95);
+    zG.strokeCircle(28, 18, 8);
+    zG.fillStyle(0xffffff, 1);
+    zG.fillCircle(28, 18, 3);
+    zG.generateTexture('poi_nebula_siphon', 56, 64);
+    zG.destroy();
+
+    // Sector 4: Forge-Master Vulcan's Obsidian Smelter (72x72)
+    const vG = this.make.graphics({ x: 0, y: 0, add: false });
+    // Heavy Basalt Furnace Base
+    vG.fillStyle(0x18181b, 1);
+    vG.fillRect(10, 22, 52, 48);
+    vG.fillStyle(0x27272a, 1);
+    vG.fillRect(14, 26, 44, 40);
+    // Molten Smelter Crucible Opening
+    vG.fillStyle(0xef4444, 1);
+    vG.fillRect(22, 42, 28, 18);
+    vG.fillStyle(0xf97316, 1);
+    vG.fillRect(24, 44, 24, 14);
+    vG.fillStyle(0xfacc15, 1);
+    vG.fillRect(28, 48, 16, 8);
+    // Chimney Stack with Smoke
+    vG.fillStyle(0x18181b, 1);
+    vG.fillRect(28, 6, 16, 18);
+    vG.fillStyle(0x52525b, 0.8);
+    vG.fillCircle(36, 4, 6);
+    vG.generateTexture('poi_volcanic_foundry', 72, 72);
+    vG.destroy();
+
+    // Sector 4: Geologist Pyra's Thermal Core Extractor (60x64)
+    const pyG = this.make.graphics({ x: 0, y: 0, add: false });
+    pyG.fillStyle(0x18181b, 1);
+    pyG.fillRect(16, 24, 28, 38);
+    // Drill Piston & Pressure Pipes
+    pyG.lineStyle(3, 0xf97316, 1);
+    pyG.lineBetween(30, 24, 30, 6);
+    pyG.fillStyle(0xef4444, 1);
+    pyG.fillCircle(30, 6, 5);
+    pyG.fillStyle(0xfacc15, 1);
+    pyG.fillCircle(30, 6, 2);
+    pyG.generateTexture('poi_volcanic_extractor', 60, 64);
+    pyG.destroy();
+
+    // Sector 5: Arch-Archivist Solon's Celestial Vault (68x72)
+    const soG = this.make.graphics({ x: 0, y: 0, add: false });
+    // Ancient Celestial Pedestal
+    soG.fillStyle(0x0f172a, 1);
+    soG.fillRect(16, 42, 36, 28);
+    soG.fillStyle(0xf59e0b, 1);
+    soG.fillRect(14, 40, 40, 4);
+    // Floating Golden Runic Tablet
+    soG.fillStyle(0xfbbf24, 1);
+    soG.fillRoundedRect(22, 10, 24, 26, 3);
+    soG.lineStyle(1.5, 0x38bdf8, 1);
+    soG.strokeRoundedRect(22, 10, 24, 26, 3);
+    // Runic Glyphs
+    soG.fillStyle(0x0f172a, 1);
+    soG.fillRect(26, 16, 16, 3);
+    soG.fillRect(26, 22, 12, 3);
+    soG.fillRect(26, 28, 14, 3);
+    soG.generateTexture('poi_ruins_vault', 68, 72);
+    soG.destroy();
+
+    // Sector 5: Titan-Keeper Aethelgard's Golden Shrine (64x72)
+    const aeG = this.make.graphics({ x: 0, y: 0, add: false });
+    aeG.fillStyle(0x1e293b, 1);
+    aeG.fillRect(20, 24, 24, 46);
+    aeG.fillStyle(0xf59e0b, 1);
+    aeG.fillRect(16, 20, 32, 5);
+    aeG.fillRect(16, 66, 32, 5);
+    // Floating Celestial Energy Orb
+    aeG.fillStyle(0x38bdf8, 0.9);
+    aeG.fillCircle(32, 10, 8);
+    aeG.fillStyle(0xffffff, 1);
+    aeG.fillCircle(32, 10, 3);
+    aeG.generateTexture('poi_ruins_shrine', 64, 72);
+    aeG.destroy();
   }
 }

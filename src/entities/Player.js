@@ -586,12 +586,18 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       this.scene.spawnPlayerBullet(spawnX, spawnY, dir, weapon);
     }
 
-    // Shotgun fires 2 additional spread pellets
+    // Shotgun fires 2 additional parallel horizontal pellets (straight horizontal spread)
     if (weapon === 'SHOTGUN' && this.scene && typeof this.scene.spawnPlayerBullet === 'function') {
-      const b2 = this.scene.spawnPlayerBullet(spawnX, spawnY - 4, dir, weapon);
-      if (b2 && b2.body) b2.setVelocityY(-60);
-      const b3 = this.scene.spawnPlayerBullet(spawnX, spawnY + 4, dir, weapon);
-      if (b3 && b3.body) b3.setVelocityY(60);
+      const b2 = this.scene.spawnPlayerBullet(spawnX, spawnY - 6, dir, weapon);
+      if (b2 && b2.body) {
+        b2.body.setAllowGravity(false);
+        b2.setVelocity(dir * spec.speed, 0);
+      }
+      const b3 = this.scene.spawnPlayerBullet(spawnX, spawnY + 6, dir, weapon);
+      if (b3 && b3.body) {
+        b3.body.setAllowGravity(false);
+        b3.setVelocity(dir * spec.speed, 0);
+      }
     }
 
     // Subtle gun recoil animation on character

@@ -110,8 +110,10 @@ export const LEVEL_1_DATA = {
     { x: 1420, y: 250, type: 'AEGIS_CORE' }
   ],
 
-  // Environmental storytelling / decor objects
+  // Environmental storytelling, character POIs & decor objects
   decorations: [
+    { x: 300, y: 418, texture: 'poi_frontier_uplink', label: '[POI] COMMANDER ORION • GATEWAY UPLINK', labelColor: '#38bdf8' },
+    { x: 1200, y: 220, texture: 'poi_frontier_nav', label: '[POI] NOVA • ASTRAL BEACON', labelColor: '#00f0ff' },
     { x: 120, y: 402, texture: 'holo_sign' },
     { x: 920, y: 215, texture: 'pipe_station' }
   ]

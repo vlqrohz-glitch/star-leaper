@@ -96,6 +96,8 @@ export const LEVEL_5_DATA = {
   ],
 
   decorations: [
+    { x: 340, y: 418, texture: 'poi_ruins_vault', label: '[POI] ARCH-ARCHIVIST SOLON • CELESTIAL VAULT', labelColor: '#fde047' },
+    { x: 1450, y: 230, texture: 'poi_ruins_shrine', label: '[POI] AETHELGARD • TITAN SHRINE', labelColor: '#38bdf8' },
     { x: 140, y: 402, texture: 'holo_sign' }
   ]
 };

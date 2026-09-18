@@ -100,6 +100,8 @@ export const LEVEL_2_DATA = {
   ],
 
   decorations: [
+    { x: 340, y: 418, texture: 'poi_station_hangar', label: '[POI] CHIEF JAX • TITAN MECHA BAY', labelColor: '#facc15' },
+    { x: 1260, y: 220, texture: 'poi_station_cryolab', label: '[POI] DR. ARIS • CYBER CRYO-LAB', labelColor: '#38bdf8' },
     { x: 140, y: 402, texture: 'holo_sign' },
     { x: 520, y: 345, texture: 'pipe_station' },
     { x: 1220, y: 225, texture: 'pipe_station' }

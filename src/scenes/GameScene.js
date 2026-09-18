@@ -78,6 +78,7 @@ export class GameScene extends Phaser.Scene {
 
     // 5. Level Markers & Goal Beacon
     this.createLevelMarkers();
+    this.createDecorations();
 
     // 6. Game State & Progress Systems (Authoritative Gameplay Subsystems)
     const totalCollectibles = (this.levelData.collectibles || []).length;
@@ -486,6 +487,67 @@ export class GameScene extends Phaser.Scene {
       this.goal.setVisible(false);
       if (this.goal.body) this.goal.body.enable = false;
       this.goalLabel.setVisible(false);
+    }
+  }
+
+  createDecorations() {
+    this.decorations = [];
+    if (!this.levelData.decorations || !Array.isArray(this.levelData.decorations)) {
+      return;
+    }
+
+    for (const d of this.levelData.decorations) {
+      if (!this.textures.exists(d.texture)) continue;
+
+      const originX = d.originX !== undefined ? d.originX : 0.5;
+      const originY = d.originY !== undefined ? d.originY : 1; // Default grounded at bottom
+      const spr = this.add.image(d.x, d.y, d.texture)
+        .setOrigin(originX, originY)
+        .setDepth(d.depth || 8)
+        .setAlpha(d.alpha || 1);
+
+      if (d.scale) spr.setScale(d.scale);
+      if (d.flipX) spr.setFlipX(true);
+
+      // Character & Lore POI Plaque / Overhead Badge
+      if (d.label) {
+        const sprHeight = (spr.height || 32) * (spr.scaleY || 1);
+        const labelY = d.y - (sprHeight * originY) - 10;
+
+        const lblBg = this.add.text(d.x, labelY, d.label, {
+          fontFamily: '"Press Start 2P", monospace',
+          fontSize: '7px',
+          color: d.labelColor || '#facc15',
+          backgroundColor: '#05070dbb',
+          padding: { x: 5, y: 3 }
+        }).setOrigin(0.5, 1).setDepth(14);
+
+        // Subtle floating glow animation for character POI plaques
+        this.tweens.add({
+          targets: lblBg,
+          y: labelY - 4,
+          duration: 1500,
+          yoyo: true,
+          repeat: -1,
+          ease: 'Sine.easeInOut'
+        });
+      }
+
+      // Atmospheric animation for tumbleweeds
+      if (d.texture === 'scenery_tumbleweed') {
+        const driftDistance = d.drift || 90;
+        this.tweens.add({
+          targets: spr,
+          x: spr.x + driftDistance,
+          angle: 360,
+          duration: 3200,
+          yoyo: true,
+          repeat: -1,
+          ease: 'Linear'
+        });
+      }
+
+      this.decorations.push(spr);
     }
   }
 

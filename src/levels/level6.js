@@ -96,5 +96,34 @@ export const LEVEL_6_DATA = {
     { type: 'GUNSLINGER', x: 1820, y: 210 },
     { type: 'DYNAMITE_BANDIT', x: 2120, y: 300 },
     { type: 'GUNSLINGER', x: 2370, y: 280 }
+  ],
+
+  // Authentic Wild West Cowboy Country Environmental Scenery & Character POIs
+  decorations: [
+    // Sheriff Wyatt's Office & Jailhouse
+    { x: 360, y: 418, texture: 'poi_sheriff_office', label: '[POI] SHERIFF WYATT • JAILHOUSE', labelColor: '#facc15', depth: 8 },
+    // Saguaro Cacti along Canyon floor
+    { x: 140, y: 418, texture: 'scenery_cactus_tall', depth: 7 },
+    { x: 450, y: 418, texture: 'scenery_cactus_tall', depth: 7 },
+    { x: 490, y: 418, texture: 'scenery_cactus_small', depth: 7 },
+    { x: 260, y: 418, texture: 'scenery_wagon_wheel', depth: 9 },
+    { x: 510, y: 418, texture: 'scenery_skull', depth: 9 },
+    // Rolling Desert Tumbleweed
+    { x: 620, y: 412, texture: 'scenery_tumbleweed', drift: 90, depth: 9 },
+
+    // Billy the Kid's 2-Story Outlaw Saloon
+    { x: 1130, y: 418, texture: 'poi_saloon', label: '[POI] BILLY THE KID • OUTLAW SALOON', labelColor: '#fb923c', depth: 8 },
+    { x: 1040, y: 418, texture: 'scenery_wagon_wheel', depth: 9 },
+    { x: 1220, y: 418, texture: 'scenery_cactus_tall', depth: 7 },
+    { x: 1350, y: 418, texture: 'scenery_skull', depth: 9 },
+    { x: 1460, y: 418, texture: 'scenery_cactus_small', depth: 7 },
+
+    // Prospector Pete's Gold Assay & Bank
+    { x: 1960, y: 418, texture: 'poi_frontier_bank', label: '[POI] PROSPECTOR PETE • GOLD ASSAY', labelColor: '#fde047', depth: 8 },
+    { x: 1870, y: 418, texture: 'scenery_cactus_tall', depth: 7 },
+    { x: 2040, y: 418, texture: 'scenery_wagon_wheel', depth: 9 },
+    { x: 2150, y: 418, texture: 'scenery_tumbleweed', drift: 110, depth: 9 },
+    { x: 2280, y: 418, texture: 'scenery_cactus_tall', depth: 7 },
+    { x: 2320, y: 418, texture: 'scenery_cactus_small', depth: 7 }
   ]
 };

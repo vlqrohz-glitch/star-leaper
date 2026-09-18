@@ -32,14 +32,10 @@ export class PlayerBullet extends Phaser.Physics.Arcade.Sprite {
     this.setFlipX(this.dir < 0);
     this.setDepth(18);
 
-    if (spec.hasArcGravity) {
-      this.body.setAllowGravity(true);
-      this.body.setGravityY(160);
-      this.setVelocity(this.dir * this.speed, -110);
-    } else {
-      this.body.setAllowGravity(false);
-      this.setVelocity(this.dir * this.speed, 0);
-    }
+    // All weapons shoot bullets straight horizontally towards enemies without vertical downward gravity arcing
+    this.body.setAllowGravity(false);
+    this.body.setGravityY(0);
+    this.setVelocity(this.dir * this.speed, 0);
 
     // Projectile trail glow
     this.createTrailEffect(spec.glowColor);
@@ -98,14 +94,14 @@ export class PlayerBullet extends Phaser.Physics.Arcade.Sprite {
         };
       case 'DYNAMITE_LAUNCHER':
         return {
-          speed: 280,
+          speed: 320,
           damage: 40,
           aoeRadius: 60,
           width: 12,
           height: 12,
           lifespanMs: 2200,
           glowColor: 0xef4444,
-          hasArcGravity: true,
+          hasArcGravity: false,
           cooldownMs: 440
         };
       case 'SHOTGUN':
@@ -154,14 +150,14 @@ export class PlayerBullet extends Phaser.Physics.Arcade.Sprite {
         };
       case 'CLUSTER_BOMB':
         return {
-          speed: 300,
+          speed: 340,
           damage: 60,
           aoeRadius: 75,
           width: 14,
           height: 14,
           lifespanMs: 2200,
           glowColor: 0xec4899,
-          hasArcGravity: true,
+          hasArcGravity: false,
           cooldownMs: 500
         };
       case 'REVOLVER':
@@ -176,6 +172,14 @@ export class PlayerBullet extends Phaser.Physics.Arcade.Sprite {
           hasArcGravity: false,
           cooldownMs: 260
         };
+    }
+  }
+
+  preUpdate(time, delta) {
+    super.preUpdate(time, delta);
+    // Enforce strictly horizontal trajectory across physics steps
+    if (this.body) {
+      this.body.velocity.y = 0;
     }
   }
 

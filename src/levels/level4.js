@@ -100,6 +100,8 @@ export const LEVEL_4_DATA = {
   ],
 
   decorations: [
+    { x: 350, y: 418, texture: 'poi_volcanic_foundry', label: '[POI] FORGE-MASTER VULCAN • OBSIDIAN SMELTER', labelColor: '#f97316' },
+    { x: 1300, y: 240, texture: 'poi_volcanic_extractor', label: '[POI] PYRA • GEOTHERMAL EXTRACTOR', labelColor: '#ef4444' },
     { x: 140, y: 402, texture: 'holo_sign' }
   ]
 };

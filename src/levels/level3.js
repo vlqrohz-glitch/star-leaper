@@ -98,6 +98,8 @@ export const LEVEL_3_DATA = {
   ],
 
   decorations: [
+    { x: 320, y: 418, texture: 'poi_nebula_sanctuary', label: '[POI] ASTRAL SEER LUMEN • VOID SANCTUARY', labelColor: '#c084fc' },
+    { x: 1350, y: 240, texture: 'poi_nebula_siphon', label: '[POI] ZEPHYR • RIFT SIPHON', labelColor: '#06b6d4' },
     { x: 140, y: 402, texture: 'holo_sign' }
   ]
 };
