@@ -337,19 +337,35 @@ export class UISystem {
     }).setOrigin(0.5);
 
     // Subtitle
-    const subtitleText = this.scene.add.text(0, -78, 'ORION ODYSSEY', {
+    const subtitleText = this.scene.add.text(0, -86, 'ORION ODYSSEY', {
       fontFamily: UI_CONFIG.FONT_FAMILY,
       fontSize: UI_CONFIG.SUBTITLE_FONT_SIZE,
       color: UI_CONFIG.COLOR_GOLD,
       letterSpacing: 2
     }).setOrigin(0.5);
 
-    // Primary Prompt Text (Maintained for existing automated test suite compatibility)
-    this.titlePromptText = this.scene.add.text(0, -42, 'PRESS ENTER TO START', {
+    // Relocated Primary Prompt Text: Placed below menu options at Y = +116 with cyan glow and clickability
+    this.titlePromptText = this.scene.add.text(0, 116, 'PRESS ENTER TO START', {
       fontFamily: UI_CONFIG.FONT_FAMILY,
       fontSize: '11px',
-      color: '#ffffff'
+      color: '#00f0ff',
+      stroke: '#000000',
+      strokeThickness: 3,
+      letterSpacing: 2
     }).setOrigin(0.5);
+
+    this.titlePromptText.setInteractive({ useHandCursor: true });
+    this.titlePromptText.on('pointerover', () => {
+      this.titlePromptText.setColor('#ffdd44');
+      this.titlePromptText.setScale(1.08);
+    });
+    this.titlePromptText.on('pointerout', () => {
+      this.titlePromptText.setColor('#00f0ff');
+      this.titlePromptText.setScale(1.0);
+    });
+    this.titlePromptText.on('pointerdown', () => {
+      this.selectTitleMenuOption('play');
+    });
 
     // Domain Watermark
     const domainWatermark = this.scene.add.text(290, -154, '🌐 STARLEAPER.IO', {
@@ -361,7 +377,7 @@ export class UISystem {
 
     this.titleContainer.add([scrim, frame, titleText, subtitleText, this.titlePromptText, domainWatermark]);
 
-    // Interactive Menu Buttons Container
+    // Interactive Menu Buttons Container (Centered neatly between subtitle and start prompt)
     this.titleMenuItems = [];
     const menuOptions = [
       { id: 'play', label: '[1] PLAY SECTOR' },
@@ -375,9 +391,9 @@ export class UISystem {
     ];
 
     menuOptions.forEach((opt, idx) => {
-      const btnY = -34 + idx * 22;
-      // Transparent hit area (visible rectangle removed)
-      const btnBg = this.scene.add.rectangle(0, btnY, 320, 22, 0x000000, 0);
+      const btnY = -52 + idx * 20;
+      // Transparent hit area
+      const btnBg = this.scene.add.rectangle(0, btnY, 320, 20, 0x000000, 0);
 
       const defaultColor = idx === 0 ? '#ffdd44' : '#e2e8f0';
       const btnText = this.scene.add.text(0, btnY, opt.label, {
@@ -415,14 +431,14 @@ export class UISystem {
       this.titleContainer.add([btnBg, btnText]);
     });
 
-    // Controls tip
+    // Controls tip (Primary Attack/Use: [E], also supports Attack: [F])
     const controlsTip = this.scene.add.text(
       0,
-      145,
-      'Controls: [A/D] Move  •  [W]/[SPACE] Jump  •  [F] Attack  •  [ESC] Pause  •  [B] Scores',
+      144,
+      'Controls: [A/D] Move  •  [W]/[SPACE] Jump  •  [E] Attack  •  [ESC] Pause  •  [B] Scores',
       {
         fontFamily: UI_CONFIG.BODY_FONT_FAMILY,
-        fontSize: '11px',
+        fontSize: '10px',
         color: '#64748b'
       }
     ).setOrigin(0.5);
