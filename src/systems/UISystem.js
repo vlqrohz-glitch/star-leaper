@@ -4,6 +4,7 @@ import { POWERUP_CONFIG } from '../config/powerUpConfig.js';
 import { LevelCompletionSystem } from './LevelCompletionSystem.js';
 import { CheatSystem } from './CheatSystem.js';
 import { ScoreboardSystem } from './ScoreboardSystem.js';
+import { INVENTORY_CATALOG } from '../config/inventoryConfig.js';
 
 /**
  * Dedicated UI & Presentation System for Star-Leaper: Orion Odyssey
@@ -31,6 +32,8 @@ export class UISystem {
     this.scoreboardTableContainer = null;
     this.scoreboardFilterSector = null;
     this.openedScoreboardFromGameplay = false;
+    this.inventoryContainer = null;
+    this.inventoryCardElements = [];
 
     // HUD text references
     this.hudScoreText = null;
@@ -66,6 +69,7 @@ export class UISystem {
     this.createSettingsOverlay();
     this.createCheatOverlay();
     this.createScoreboardOverlay();
+    this.createInventoryModal();
     this.createGameOverOverlay();
     this.createLevelCompleteOverlay();
 
@@ -89,8 +93,8 @@ export class UISystem {
       strokeThickness: 3
     });
 
-    // Line 1 Center: STAR CRYSTALS
-    this.hudCrystalsText = this.scene.add.text(190, pad.y, '★  CRYSTALS: 00 / 20', {
+    // Line 1 Center-Left: STAR CRYSTALS
+    this.hudCrystalsText = this.scene.add.text(125, pad.y, '★ 00 / 20', {
       fontFamily: UI_CONFIG.FONT_FAMILY,
       fontSize: UI_CONFIG.HUD_FONT_SIZE,
       color: UI_CONFIG.COLOR_CYAN,
@@ -98,8 +102,8 @@ export class UISystem {
       strokeThickness: 3
     });
 
-    // Line 1 Center-Right: LEVEL SECTOR & OPERATIVE
-    this.hudSectorText = this.scene.add.text(375, pad.y, 'SEC 1 • NOVA', {
+    // Line 1 Center: LEVEL SECTOR & OPERATIVE
+    this.hudSectorText = this.scene.add.text(245, pad.y, 'SEC 1-1 • NOVA', {
       fontFamily: UI_CONFIG.FONT_FAMILY,
       fontSize: UI_CONFIG.HUD_SMALL_FONT_SIZE,
       color: '#94a3b8',
@@ -107,10 +111,38 @@ export class UISystem {
       strokeThickness: 3
     });
 
+    // In-game Inventory Arsenal Button (Cyan Border)
+    const invBtn = this.scene.add.rectangle(425, pad.y + 7, 56, 22, 0x0f172a, 0.85);
+    invBtn.setStrokeStyle(1.5, 0x00f0ff, 0.85);
+    const invBtnText = this.scene.add.text(425, pad.y + 7, '🎒 INV', {
+      fontFamily: UI_CONFIG.FONT_FAMILY,
+      fontSize: '8px',
+      color: '#00f0ff'
+    }).setOrigin(0.5);
+    invBtn.setInteractive({ useHandCursor: true });
+    invBtn.on('pointerover', () => {
+      invBtn.setFillStyle(0x1e293b, 0.95);
+      invBtn.setStrokeStyle(2, 0x00f0ff, 1);
+      invBtn.setScale(1.05);
+      invBtnText.setScale(1.05);
+    });
+    invBtn.on('pointerout', () => {
+      invBtn.setFillStyle(0x0f172a, 0.85);
+      invBtn.setStrokeStyle(1.5, 0x00f0ff, 0.85);
+      invBtn.setScale(1.0);
+      invBtnText.setScale(1.0);
+    });
+    invBtn.on('pointerdown', () => {
+      if (this.scene.audioSystem) {
+        this.scene.audioSystem.playSFX(AUDIO_KEYS.UI_CONFIRM);
+      }
+      this.toggleInventory();
+    });
+
     // In-game Scoreboard Button (Gold Border)
-    const scoresBtn = this.scene.add.rectangle(495, pad.y + 7, 70, 22, 0x0f172a, 0.85);
+    const scoresBtn = this.scene.add.rectangle(488, pad.y + 7, 58, 22, 0x0f172a, 0.85);
     scoresBtn.setStrokeStyle(1.5, 0xfacc15, 0.85);
-    const scoresBtnText = this.scene.add.text(495, pad.y + 7, '🏆 SCORES', {
+    const scoresBtnText = this.scene.add.text(488, pad.y + 7, '🏆 SCORES', {
       fontFamily: UI_CONFIG.FONT_FAMILY,
       fontSize: '8px',
       color: '#facc15'
@@ -136,9 +168,9 @@ export class UISystem {
     });
 
     // In-game Cheats Button (Purple Border)
-    const codesBtn = this.scene.add.rectangle(578, pad.y + 7, 68, 22, 0x0f172a, 0.85);
+    const codesBtn = this.scene.add.rectangle(552, pad.y + 7, 56, 22, 0x0f172a, 0.85);
     codesBtn.setStrokeStyle(1.5, 0xc084fc, 0.85);
-    const codesBtnText = this.scene.add.text(578, pad.y + 7, '★ CODES', {
+    const codesBtnText = this.scene.add.text(552, pad.y + 7, '★ CODES', {
       fontFamily: UI_CONFIG.FONT_FAMILY,
       fontSize: '8px',
       color: '#c084fc'
@@ -164,9 +196,9 @@ export class UISystem {
     });
 
     // In-Game Settings Button (Interactive Cyber Button)
-    const settingsBtn = this.scene.add.rectangle(662, pad.y + 7, 74, 22, 0x0f172a, 0.85);
+    const settingsBtn = this.scene.add.rectangle(622, pad.y + 7, 66, 22, 0x0f172a, 0.85);
     settingsBtn.setStrokeStyle(1.5, 0xffdd44, 0.85);
-    const settingsBtnText = this.scene.add.text(662, pad.y + 7, '⚙ SETTINGS', {
+    const settingsBtnText = this.scene.add.text(622, pad.y + 7, '⚙ SETTINGS', {
       fontFamily: UI_CONFIG.FONT_FAMILY,
       fontSize: '8px',
       color: '#ffdd44'
@@ -193,9 +225,9 @@ export class UISystem {
     this.hudSettingsBtn = settingsBtn;
 
     // In-Game Pause Button (Interactive Cyber Button)
-    const pauseBtn = this.scene.add.rectangle(750, pad.y + 7, 66, 22, 0x0f172a, 0.85);
+    const pauseBtn = this.scene.add.rectangle(698, pad.y + 7, 58, 22, 0x0f172a, 0.85);
     pauseBtn.setStrokeStyle(1.5, 0x00f0ff, 0.85);
-    const pauseBtnText = this.scene.add.text(750, pad.y + 7, '⏸ PAUSE', {
+    const pauseBtnText = this.scene.add.text(698, pad.y + 7, '⏸ PAUSE', {
       fontFamily: UI_CONFIG.FONT_FAMILY,
       fontSize: '8px',
       color: '#00f0ff'
@@ -231,17 +263,27 @@ export class UISystem {
       strokeThickness: 3
     });
 
-    // Line 2 Center: ACTIVE WEAPON READOUT
-    this.hudWeaponText = this.scene.add.text(305, pad.y + 22, 'WEAPON: [REVOLVER] [F]', {
+    // Line 2 Center: ACTIVE WEAPON READOUT (Clickable to open Inventory modal)
+    this.hudWeaponText = this.scene.add.text(285, pad.y + 22, 'WEAPON: [1: REVOLVER] [E] | INV [I]', {
       fontFamily: UI_CONFIG.FONT_FAMILY,
       fontSize: UI_CONFIG.HUD_SMALL_FONT_SIZE,
       color: '#facc15',
       stroke: '#000000',
       strokeThickness: 3
     });
+    this.hudWeaponText.setInteractive({ useHandCursor: true });
+    this.hudWeaponText.on('pointerdown', () => this.toggleInventory());
+    this.hudWeaponText.on('pointerover', () => {
+      this.hudWeaponText.setColor('#00f0ff');
+      this.hudWeaponText.setScale(1.04);
+    });
+    this.hudWeaponText.on('pointerout', () => {
+      this.hudWeaponText.setColor('#facc15');
+      this.hudWeaponText.setScale(1.0);
+    });
 
     // Line 2 Right: ACTIVE POWER-UP READOUT
-    this.hudPowerUpText = this.scene.add.text(510, pad.y + 22, 'MODULE: --', {
+    this.hudPowerUpText = this.scene.add.text(530, pad.y + 22, 'MODULE: --', {
       fontFamily: UI_CONFIG.FONT_FAMILY,
       fontSize: UI_CONFIG.HUD_FONT_SIZE,
       color: UI_CONFIG.COLOR_MUTED,
@@ -249,11 +291,11 @@ export class UISystem {
       strokeThickness: 3
     });
 
-    // Line 3: CONTROLS & SHORTCUT GUIDE (Primary: Equip: [Q], Fire/Attack: [E], also supports Attack/Use: [E] and Attack: [F])
+    // Line 3: CONTROLS & SHORTCUT GUIDE (Primary: Equip: [Q], Fire: [E], Inv: [I], Weapons: [1-9], also supports Attack: [F] and Attack/Use: [E])
     this.guideText = this.scene.add.text(
       pad.x,
       pad.y + 42,
-      'Move: [A/D] | Jump: [Space/W] | Equip: [Q] | Fire: [E] | Pause: [ESC] | Scores: [B] | Restart: [R]',
+      'Move: [A/D] | Jump: [Space/W] | Equip: [Q] | Fire: [E] | Inv: [I] | [1-9] Weapons | Pause: [ESC] | Attack: [F]',
       {
         fontFamily: UI_CONFIG.BODY_FONT_FAMILY,
         fontSize: '11px',
@@ -297,6 +339,8 @@ export class UISystem {
       this.hudScoreText,
       this.hudCrystalsText,
       this.hudSectorText,
+      invBtn,
+      invBtnText,
       scoresBtn,
       scoresBtnText,
       codesBtn,
@@ -1152,6 +1196,206 @@ export class UISystem {
     return Boolean(this.scoreboardContainer && this.scoreboardContainer.visible);
   }
 
+  /**
+   * Creates the 9-Slot Weapon Arsenal & Inventory Modal
+   */
+  createInventoryModal() {
+    this.inventoryContainer = this.scene.add.container(400, 225).setScrollFactor(0).setDepth(130).setVisible(false);
+
+    const scrim = this.scene.add.rectangle(0, 0, 800, 450, UI_CONFIG.HEX_SCRIM_BG, 0.92);
+    scrim.setInteractive();
+
+    const panel = this.scene.add.rectangle(0, 0, 640, 360, UI_CONFIG.HEX_PANEL_BG, 0.96);
+    panel.setStrokeStyle(2, UI_CONFIG.HEX_BORDER_CYAN, 0.9);
+
+    const title = this.scene.add.text(0, -152, '⚔️ WEAPON ARSENAL & INVENTORY ⚔️', {
+      fontFamily: UI_CONFIG.FONT_FAMILY,
+      fontSize: '13px',
+      color: UI_CONFIG.COLOR_CYAN,
+      stroke: '#000000',
+      strokeThickness: 4
+    }).setOrigin(0.5);
+
+    const subtitle = this.scene.add.text(0, -132, 'PRESS [1-9] TO EQUIP INSTANTLY • CLICK ANY WEAPON TO EQUIP • [I] TO CLOSE', {
+      fontFamily: UI_CONFIG.FONT_FAMILY,
+      fontSize: '7px',
+      color: '#facc15'
+    }).setOrigin(0.5);
+
+    // Close Button [X] in top-right corner
+    const closeBtn = this.scene.add.rectangle(290, -152, 38, 20, 0xef4444, 0.85);
+    closeBtn.setStrokeStyle(1, 0xffffff, 0.8);
+    const closeBtnText = this.scene.add.text(290, -152, '✕ [I]', {
+      fontFamily: UI_CONFIG.FONT_FAMILY,
+      fontSize: '8px',
+      color: '#ffffff'
+    }).setOrigin(0.5);
+    closeBtn.setInteractive({ useHandCursor: true });
+    closeBtn.on('pointerover', () => { closeBtn.setScale(1.1); closeBtnText.setScale(1.1); });
+    closeBtn.on('pointerout', () => { closeBtn.setScale(1.0); closeBtnText.setScale(1.0); });
+    closeBtn.on('pointerdown', () => this.hideInventory());
+
+    this.inventoryContainer.add([scrim, panel, title, subtitle, closeBtn, closeBtnText]);
+
+    // 3x3 Grid of 9 Weapon Cards
+    this.inventoryCardElements = [];
+    const colOffsets = [-200, 0, 200];
+    const rowOffsets = [-72, 8, 88];
+    const cardWidth = 190;
+    const cardHeight = 72;
+
+    INVENTORY_CATALOG.forEach((item, index) => {
+      const col = index % 3;
+      const row = Math.floor(index / 3);
+      const cardX = colOffsets[col];
+      const cardY = rowOffsets[row];
+
+      // Card Background Box
+      const cardBg = this.scene.add.rectangle(cardX, cardY, cardWidth, cardHeight, 0x1e293b, 0.95);
+      cardBg.setStrokeStyle(1.5, item.colorNum, 0.7);
+
+      // Keybind Number Badge Pill (e.g. [1])
+      const badgeBg = this.scene.add.rectangle(cardX - 68, cardY - 22, 28, 16, item.colorNum, 0.25);
+      badgeBg.setStrokeStyle(1, item.colorNum, 0.9);
+      const badgeText = this.scene.add.text(cardX - 68, cardY - 22, `[${item.slot}]`, {
+        fontFamily: UI_CONFIG.FONT_FAMILY,
+        fontSize: '8px',
+        color: item.colorHex
+      }).setOrigin(0.5);
+
+      // Weapon Pixel Sprite Icon
+      let icon = null;
+      if (this.scene.textures.exists(item.texture)) {
+        icon = this.scene.add.image(cardX - 68, cardY + 8, item.texture);
+        icon.setScale(1.25);
+      } else {
+        icon = this.scene.add.text(cardX - 68, cardY + 8, '🔫', { fontSize: '14px' }).setOrigin(0.5);
+      }
+
+      // Weapon Title
+      const nameText = this.scene.add.text(cardX - 44, cardY - 24, item.name.toUpperCase(), {
+        fontFamily: UI_CONFIG.FONT_FAMILY,
+        fontSize: '8px',
+        color: '#ffffff',
+        stroke: '#000000',
+        strokeThickness: 2
+      });
+
+      // Stats (DMG & Type)
+      const statsText = this.scene.add.text(cardX - 44, cardY - 12, `DMG: ${item.damage}  •  ${item.type}`, {
+        fontFamily: UI_CONFIG.FONT_FAMILY,
+        fontSize: '7px',
+        color: item.colorHex
+      });
+
+      // Description / Lore
+      const descText = this.scene.add.text(cardX - 44, cardY - 1, item.desc, {
+        fontFamily: UI_CONFIG.BODY_FONT_FAMILY,
+        fontSize: '9px',
+        color: '#94a3b8'
+      });
+
+      // Status Pill: [EQUIPPED] or [SELECT (X)]
+      const statusText = this.scene.add.text(cardX - 44, cardY + 16, `SELECT [${item.slot}]`, {
+        fontFamily: UI_CONFIG.FONT_FAMILY,
+        fontSize: '7px',
+        color: '#64748b'
+      });
+
+      // Interactivity
+      cardBg.setInteractive({ useHandCursor: true });
+      const onSelect = () => {
+        if (this.scene && typeof this.scene.equipWeaponBySlot === 'function') {
+          this.scene.equipWeaponBySlot(item.slot);
+        }
+      };
+
+      cardBg.on('pointerover', () => {
+        cardBg.setFillStyle(0x334155, 1);
+        cardBg.setStrokeStyle(2, item.colorNum, 1);
+      });
+      cardBg.on('pointerout', () => {
+        const isEquipped = (this.scene.player && this.scene.player.getWeapon() === item.id);
+        cardBg.setFillStyle(isEquipped ? 0x0f283d : 0x1e293b, 0.95);
+        cardBg.setStrokeStyle(isEquipped ? 2 : 1.5, item.colorNum, isEquipped ? 1 : 0.7);
+      });
+      cardBg.on('pointerdown', onSelect);
+
+      this.inventoryCardElements.push({
+        slot: item.slot,
+        id: item.id,
+        bg: cardBg,
+        statusText: statusText,
+        colorNum: item.colorNum,
+        colorHex: item.colorHex
+      });
+
+      this.inventoryContainer.add([cardBg, badgeBg, badgeText, icon, nameText, statsText, descText, statusText]);
+    });
+
+    // Modal Footer
+    const footerText = this.scene.add.text(0, 150, 'FIRE WITH [E] (SIGNIFICANT DAMAGE 12-60 HP) • HOTKEYS [1-9] ACTIVE IN COMBAT', {
+      fontFamily: UI_CONFIG.FONT_FAMILY,
+      fontSize: '7px',
+      color: '#38bdf8'
+    }).setOrigin(0.5);
+
+    this.inventoryContainer.add(footerText);
+  }
+
+  showInventory() {
+    if (!this.inventoryContainer) return;
+    this.refreshInventoryCards();
+    this.inventoryContainer.setVisible(true).setAlpha(0);
+    this.scene.tweens.add({
+      targets: this.inventoryContainer,
+      alpha: 1,
+      duration: 160,
+      ease: 'Power2'
+    });
+    if (this.scene.audioSystem) {
+      this.scene.audioSystem.playSFX(AUDIO_KEYS.UI_CONFIRM);
+    }
+  }
+
+  hideInventory() {
+    if (!this.inventoryContainer || !this.inventoryContainer.visible) return;
+    this.inventoryContainer.setVisible(false);
+    if (this.scene.audioSystem) {
+      this.scene.audioSystem.playSFX(AUDIO_KEYS.UI_NAV || AUDIO_KEYS.UI_START);
+    }
+  }
+
+  toggleInventory() {
+    if (!this.inventoryContainer) return;
+    if (this.inventoryContainer.visible) {
+      this.hideInventory();
+    } else {
+      this.showInventory();
+    }
+  }
+
+  isInventoryActive() {
+    return Boolean(this.inventoryContainer && this.inventoryContainer.visible);
+  }
+
+  refreshInventoryCards() {
+    if (!this.inventoryCardElements || !this.scene.player) return;
+    const currentWeapon = this.scene.player.getWeapon ? this.scene.player.getWeapon() : 'REVOLVER';
+    this.inventoryCardElements.forEach(card => {
+      const isEquipped = (card.id === currentWeapon);
+      if (isEquipped) {
+        card.bg.setFillStyle(0x0f283d, 0.98);
+        card.bg.setStrokeStyle(2, 0x00f0ff, 1);
+        card.statusText.setText('● EQUIPPED').setColor('#00f0ff');
+      } else {
+        card.bg.setFillStyle(0x1e293b, 0.95);
+        card.bg.setStrokeStyle(1.5, card.colorNum, 0.7);
+        card.statusText.setText(`SELECT [${card.slot}]`).setColor('#64748b');
+      }
+    });
+  }
+
   showSettings() {
     if (this.currentState === UIState.GAMEPLAY) {
       this.togglePause();
@@ -1512,15 +1756,15 @@ export class UISystem {
     const formattedCrystals = `${String(crystals).padStart(2, '0')} / ${String(totalCrystals).padStart(2, '0')}`;
 
     this.hudScoreText.setText(`SCORE: ${formattedScore}`);
-    this.hudCrystalsText.setText(`★  CRYSTALS: ${formattedCrystals}`);
+    this.hudCrystalsText.setText(`★ ${formattedCrystals}`);
 
     // Sector & Operative info
     const secNum = this.scene.levelIndex || this.scene.currentLevelIndex || 1;
     const subNum = this.scene.subLevel || 1;
     const charName = this.scene.player && this.scene.player.characterProfile ? this.scene.player.characterProfile.getName().toUpperCase() : 'NOVA';
     if (this.hudSectorText) {
-      const subTag = (subNum === 10) ? '[FINAL BOSS]' : `STAGE ${subNum}/10`;
-      this.hudSectorText.setText(`SEC ${secNum} • ${subTag} • ${charName}`);
+      const subTag = (subNum === 10) ? 'BOSS' : `${subNum}/10`;
+      this.hudSectorText.setText(`SEC ${secNum}-${subTag} • ${charName}`);
     }
 
     // Line 2: Health (Segmented Shields / HP Bar) & Lives
@@ -1557,7 +1801,10 @@ export class UISystem {
       const activeWeapon = (this.scene.player && typeof this.scene.player.getWeapon === 'function')
         ? this.scene.player.getWeapon()
         : 'REVOLVER';
-      this.hudWeaponText.setText(`WEAPON: [${activeWeapon}] [E]`);
+      const catItem = INVENTORY_CATALOG.find(w => w.id === activeWeapon);
+      const slotNum = catItem ? catItem.slot : 1;
+      const wName = catItem ? catItem.name : activeWeapon;
+      this.hudWeaponText.setText(`WEAPON: [${slotNum}: ${wName.toUpperCase()}] [E] | INV [I]`);
     }
 
     // Arena Boss Health Bar update
@@ -1782,6 +2029,9 @@ export class UISystem {
       this.scoreboardContainer.setVisible(false);
     }
     this.openedScoreboardFromGameplay = false;
+    if (this.inventoryContainer) {
+      this.inventoryContainer.setVisible(false);
+    }
     this.currentState = UIState.GAMEPLAY;
     this.showGameplayHUD();
     this.updateHUD();

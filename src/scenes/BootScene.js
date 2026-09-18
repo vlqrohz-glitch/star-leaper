@@ -1466,6 +1466,66 @@ export class BootScene extends Phaser.Scene {
     sg.generateTexture('weapon_shotgun', 26, 16);
     sg.destroy();
 
+    // 5b. Aegis Blaster (26x16 Harmonic Barrier Pulse Cannon)
+    const ab = this.make.graphics({ x: 0, y: 0, add: false });
+    ab.fillStyle(0x0f172a, 1);
+    ab.fillRoundedRect(2, 6, 7, 8, 2); // Slate grip
+    ab.fillStyle(0x0284c7, 1);
+    ab.fillRect(8, 4, 11, 7);          // Armored casing
+    ab.fillStyle(0x38bdf8, 1);
+    ab.fillRect(11, 5, 5, 5);          // Harmonic shield emitter
+    ab.fillStyle(0x00f0ff, 1);
+    ab.fillRect(19, 5, 6, 4);          // Prismatic muzzle
+    ab.fillStyle(0xffffff, 1);
+    ab.fillRect(23, 6, 2, 2);          // Beam focal point
+    ab.generateTexture('weapon_aegis_blaster', 26, 16);
+    ab.destroy();
+
+    // 5c. Chrono Cannon (26x16 Quantum Temporal Pulse Rifle)
+    const cc = this.make.graphics({ x: 0, y: 0, add: false });
+    cc.fillStyle(0x1e1b4b, 1);
+    cc.fillRoundedRect(2, 6, 7, 8, 2); // Deep violet grip
+    cc.fillStyle(0x581c87, 1);
+    cc.fillRect(8, 4, 10, 7);          // Phase chamber
+    cc.fillStyle(0xa855f7, 1);
+    cc.fillRect(10, 5, 6, 4);          // Quantum coil
+    cc.fillStyle(0xd8b4fe, 1);
+    cc.fillRect(18, 5, 7, 3);          // Temporal emitter
+    cc.fillStyle(0xffffff, 1);
+    cc.fillCircle(24, 6, 1.5);         // Tachyon lens
+    cc.generateTexture('weapon_chrono_warp', 26, 16);
+    cc.destroy();
+
+    // 5d. Hyper Laser (28x16 Emerald Heavy Continuous Beam Cannon)
+    const hl = this.make.graphics({ x: 0, y: 0, add: false });
+    hl.fillStyle(0x064e3b, 1);
+    hl.fillRoundedRect(2, 6, 7, 8, 2); // Dark emerald grip
+    hl.fillStyle(0x065f46, 1);
+    hl.fillRect(8, 3, 11, 8);          // Heavy power block
+    hl.fillStyle(0x10b981, 1);
+    hl.fillRect(11, 5, 6, 4);          // Fusion reactor
+    hl.fillStyle(0x34d399, 1);
+    hl.fillRect(19, 4, 8, 4);          // Hyper laser barrel
+    hl.fillStyle(0xffffff, 1);
+    hl.fillRect(25, 5, 2, 2);          // Focus emitter
+    hl.generateTexture('weapon_hyper_laser', 28, 16);
+    hl.destroy();
+
+    // 5e. Cluster Bomb Launcher (26x16 High-Yield Starburst Cannon)
+    const cb = this.make.graphics({ x: 0, y: 0, add: false });
+    cb.fillStyle(0x500724, 1);
+    cb.fillRoundedRect(2, 6, 7, 8, 2); // Dark magenta stock
+    cb.fillStyle(0x831843, 1);
+    cb.fillRect(8, 3, 12, 9);          // Broad rocket chamber
+    cb.fillStyle(0xec4899, 1);
+    cb.fillRect(11, 5, 6, 5);          // Cluster warhead
+    cb.fillStyle(0xf43f5e, 1);
+    cb.fillRect(20, 4, 5, 6);          // Quad rocket exhaust muzzle
+    cb.fillStyle(0xfacc15, 1);
+    cb.fillCircle(24, 4, 1.5);         // Fuse spark
+    cb.generateTexture('weapon_cluster_bomb', 26, 16);
+    cb.destroy();
+
     // 6. Player Bullet (10x5 Brass High-Velocity Bullet)
     const b = this.make.graphics({ x: 0, y: 0, add: false });
     b.fillStyle(0xfacc15, 1);

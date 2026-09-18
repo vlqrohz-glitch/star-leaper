@@ -13,8 +13,22 @@ export class InputSystem {
       space: Phaser.Input.Keyboard.KeyCodes.SPACE,
       equip: Phaser.Input.Keyboard.KeyCodes.Q,
       use: Phaser.Input.Keyboard.KeyCodes.E,
-      attack: Phaser.Input.Keyboard.KeyCodes.F
+      attack: Phaser.Input.Keyboard.KeyCodes.F,
+      inventory: Phaser.Input.Keyboard.KeyCodes.I
     });
+
+    // 1-9 Number Key Mapping for Inventory Weapon Slots
+    this.slotKeys = [
+      scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ONE),
+      scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TWO),
+      scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.THREE),
+      scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.FOUR),
+      scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.FIVE),
+      scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SIX),
+      scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SEVEN),
+      scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.EIGHT),
+      scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.NINE)
+    ];
 
     // Virtual Touch State for Mobile Devices
     this.touchState = {
@@ -26,6 +40,9 @@ export class InputSystem {
       jumpJustReleased: false,
       equip: false,
       equipJustPressed: false,
+      inventory: false,
+      inventoryJustPressed: false,
+      selectedSlot: null,
       attack: false,
       attackJustPressed: false
     };
@@ -99,5 +116,28 @@ export class InputSystem {
       this.touchState.equipJustPressed = false;
     }
     return justPressed;
+  }
+
+  isInventoryJustPressed() {
+    const justPressed = (this.wasd.inventory && Phaser.Input.Keyboard.JustDown(this.wasd.inventory)) ||
+                        this.touchState.inventoryJustPressed;
+    if (this.touchState.inventoryJustPressed) {
+      this.touchState.inventoryJustPressed = false;
+    }
+    return justPressed;
+  }
+
+  getJustPressedSlot() {
+    if (this.touchState.selectedSlot !== null) {
+      const slot = this.touchState.selectedSlot;
+      this.touchState.selectedSlot = null;
+      return slot;
+    }
+    for (let i = 0; i < this.slotKeys.length; i++) {
+      if (Phaser.Input.Keyboard.JustDown(this.slotKeys[i])) {
+        return i + 1;
+      }
+    }
+    return null;
   }
 }

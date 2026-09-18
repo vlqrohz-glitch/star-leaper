@@ -79,28 +79,34 @@ export class WeaponPickup extends Phaser.Physics.Arcade.Sprite {
     scene.add.existing(this);
     scene.physics.add.existing(this);
 
+    this.setOrigin(0.5, 0.5);
+    this.setScale(1.25);
     this.body.setAllowGravity(false);
     this.body.setImmovable(true);
+    this.body.setVelocity(0, 0);
     this.setSize(28, 20);
-    this.setDepth(14);
+    this.setDepth(20);
 
-    // Holographic aura halo ring behind weapon
-    this.halo = scene.add.circle(x, y, 16, meta.colorNum, 0.22);
-    this.halo.setStrokeStyle(1.5, meta.colorNum, 0.7);
-    this.halo.setDepth(13);
+    // Glowing energy sphere circle perfectly centering the gun
+    this.halo = scene.add.circle(x, y, 22, meta.colorNum, 0.32);
+    this.halo.setStrokeStyle(2, meta.colorNum, 0.9);
+    this.halo.setDepth(18);
+
+    this.haloInner = scene.add.circle(x, y, 16, 0xffffff, 0.15);
+    this.haloInner.setDepth(19);
 
     // Overhead Floating HUD prompt (Q key to equip, supports [E] COLLECT token)
-    this.promptText = scene.add.text(x, y - 22, `[Q] EQUIP ${meta.name.toUpperCase()}`, {
+    this.promptText = scene.add.text(x, y - 28, `[Q] EQUIP ${meta.name.toUpperCase()}`, {
       fontFamily: UI_CONFIG.FONT_FAMILY,
       fontSize: '7px',
       color: meta.colorHex,
       stroke: '#000000',
       strokeThickness: 3
-    }).setOrigin(0.5).setDepth(15);
+    }).setOrigin(0.5).setDepth(22);
 
-    // Continuous floating/bobbing animation
+    // Continuous floating/bobbing animation keeping gun and sphere synchronized
     this.bobTween = scene.tweens.add({
-      targets: [this, this.halo, this.promptText],
+      targets: [this, this.halo, this.haloInner, this.promptText],
       y: '-=8',
       duration: 850,
       yoyo: true,
@@ -110,14 +116,31 @@ export class WeaponPickup extends Phaser.Physics.Arcade.Sprite {
 
     // Halo gentle pulsing scale
     this.pulseTween = scene.tweens.add({
-      targets: this.halo,
-      scale: 1.25,
-      alpha: 0.45,
+      targets: [this.halo, this.haloInner],
+      scale: 1.2,
+      alpha: 0.5,
       duration: 750,
       yoyo: true,
       repeat: -1,
       ease: 'Quad.easeInOut'
     });
+  }
+
+  preUpdate(time, delta) {
+    super.preUpdate(time, delta);
+    if (this.body) {
+      this.body.setAllowGravity(false);
+      this.body.setVelocity(0, 0);
+    }
+    if (this.halo && this.active) {
+      this.halo.setPosition(this.x, this.y);
+    }
+    if (this.haloInner && this.active) {
+      this.haloInner.setPosition(this.x, this.y);
+    }
+    if (this.promptText && this.active) {
+      this.promptText.setPosition(this.x, this.y - 28);
+    }
   }
 
   /**
@@ -156,6 +179,7 @@ export class WeaponPickup extends Phaser.Physics.Arcade.Sprite {
     if (this.bobTween) this.bobTween.stop();
     if (this.pulseTween) this.pulseTween.stop();
     if (this.halo) this.halo.destroy();
+    if (this.haloInner) this.haloInner.destroy();
     if (this.promptText) this.promptText.destroy();
 
     this.destroy();

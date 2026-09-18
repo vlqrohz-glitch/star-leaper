@@ -57,9 +57,15 @@ export class PlayerBullet extends Phaser.Physics.Arcade.Sprite {
       case 'PHOTON_RIFLE':
         return 'player_photon';
       case 'DYNAMITE_LAUNCHER':
+      case 'CLUSTER_BOMB':
         return 'player_dynamite';
       case 'SHOTGUN':
         return 'player_scatter';
+      case 'AEGIS_BLASTER':
+        return 'player_plasma';
+      case 'CHRONO_WARP':
+      case 'HYPER_LASER':
+        return 'player_photon';
       case 'REVOLVER':
       default:
         return 'player_bullet';
@@ -70,60 +76,105 @@ export class PlayerBullet extends Phaser.Physics.Arcade.Sprite {
     switch (weaponType) {
       case 'PLASMA_BLASTER':
         return {
-          speed: 380,
-          damage: 1,
-          width: 12,
+          speed: 420,
+          damage: 12,
+          width: 14,
           height: 8,
           lifespanMs: 1800,
           glowColor: 0x00f0ff,
           hasArcGravity: false,
-          cooldownMs: 240
+          cooldownMs: 200
         };
       case 'PHOTON_RIFLE':
         return {
-          speed: 520,
-          damage: 2,
-          width: 16,
-          height: 4,
-          lifespanMs: 1500,
+          speed: 560,
+          damage: 28,
+          width: 18,
+          height: 5,
+          lifespanMs: 1600,
           glowColor: 0xc084fc,
           hasArcGravity: false,
-          cooldownMs: 340
+          cooldownMs: 300
         };
       case 'DYNAMITE_LAUNCHER':
         return {
-          speed: 260,
-          damage: 2,
-          aoeRadius: 46,
-          width: 10,
-          height: 10,
+          speed: 280,
+          damage: 40,
+          aoeRadius: 60,
+          width: 12,
+          height: 12,
           lifespanMs: 2200,
           glowColor: 0xef4444,
           hasArcGravity: true,
-          cooldownMs: 480
+          cooldownMs: 440
         };
       case 'SHOTGUN':
         return {
-          speed: 330,
-          damage: 1,
-          width: 6,
-          height: 6,
+          speed: 360,
+          damage: 10,
+          width: 8,
+          height: 8,
           lifespanMs: 1200,
           glowColor: 0xf59e0b,
           hasArcGravity: false,
-          cooldownMs: 380
+          cooldownMs: 340
+        };
+      case 'AEGIS_BLASTER':
+        return {
+          speed: 460,
+          damage: 35,
+          width: 14,
+          height: 10,
+          lifespanMs: 1800,
+          glowColor: 0x38bdf8,
+          hasArcGravity: false,
+          cooldownMs: 320
+        };
+      case 'CHRONO_WARP':
+        return {
+          speed: 500,
+          damage: 32,
+          width: 16,
+          height: 6,
+          lifespanMs: 1600,
+          glowColor: 0xa855f7,
+          hasArcGravity: false,
+          cooldownMs: 260
+        };
+      case 'HYPER_LASER':
+        return {
+          speed: 620,
+          damage: 50,
+          width: 22,
+          height: 6,
+          lifespanMs: 1600,
+          glowColor: 0x10b981,
+          hasArcGravity: false,
+          cooldownMs: 350
+        };
+      case 'CLUSTER_BOMB':
+        return {
+          speed: 300,
+          damage: 60,
+          aoeRadius: 75,
+          width: 14,
+          height: 14,
+          lifespanMs: 2200,
+          glowColor: 0xec4899,
+          hasArcGravity: true,
+          cooldownMs: 500
         };
       case 'REVOLVER':
       default:
         return {
-          speed: 350,
-          damage: 1,
+          speed: 380,
+          damage: 15,
           width: 10,
           height: 5,
           lifespanMs: 2000,
           glowColor: 0xfacc15,
           hasArcGravity: false,
-          cooldownMs: 280
+          cooldownMs: 260
         };
     }
   }
@@ -223,10 +274,20 @@ export class PlayerBullet extends Phaser.Physics.Arcade.Sprite {
       if (!enemy || !enemy.active || (enemy.isActive && !enemy.isActive())) return;
       const d = Phaser.Math.Distance.Between(this.x, this.y, enemy.x, enemy.y);
       if (d <= this.aoeRadius) {
-        if (typeof enemy.defeat === 'function') {
+        if (typeof enemy.takeDamage === 'function') {
+          enemy.takeDamage(this.damage);
+        } else if (typeof enemy.defeat === 'function') {
           enemy.defeat();
         }
       }
     });
+
+    // Also check Boss entity if active in arena
+    if (this.scene.boss && this.scene.boss.active) {
+      const bDist = Phaser.Math.Distance.Between(this.x, this.y, this.scene.boss.x, this.scene.boss.y);
+      if (bDist <= this.aoeRadius) {
+        this.scene.boss.takeDamage(this.damage);
+      }
+    }
   }
 }

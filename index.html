@@ -606,6 +606,7 @@
         <button id="touch-toggle-btn" class="header-btn" onclick="window.toggleTouchControls()">🎮 TOUCH</button>
         <button id="touch-size-btn" class="header-btn" onclick="window.cycleTouchButtonScale()" title="Cycle button size (75%, 100%, 125%, 150%)">🎛️ SIZE: 100%</button>
         <button id="mobile-guide-btn" class="header-btn" onclick="window.toggleMobileModal()">📱 MOBILE</button>
+        <button id="inventory-btn" class="header-btn" onclick="if (window.game && window.game.scene) { const gs = window.game.scene.getScene('GameScene'); if (gs && gs.toggleInventory) gs.toggleInventory(); }" style="border-color: #00f0ff; color: #00f0ff;">🎒 INV [I]</button>
         <button id="scoreboard-btn" class="header-btn" onclick="if (window.game && window.game.scene) { const gs = window.game.scene.getScene('GameScene'); if (gs && gs.uiSystem) gs.uiSystem.showScoreboard(); }" style="border-color: #facc15; color: #facc15;">🏆 SCORES [B]</button>
         <button id="cheats-btn" class="header-btn" onclick="if (window.game && window.game.scene) { const gs = window.game.scene.getScene('GameScene'); if (gs && gs.uiSystem) gs.uiSystem.showCheatTerminal(); }" title="Cheat Codes Terminal (C)" style="border-color: #c084fc; color: #c084fc;">★ CHEATS</button>
         <button id="settings-btn" class="header-btn" onclick="if (window.game && window.game.scene) { const gs = window.game.scene.getScene('GameScene'); if (gs && gs.uiSystem) gs.uiSystem.showSettings(); }">⚙ SETTINGS</button>
@@ -626,6 +627,7 @@
       <!-- On-Screen Virtual Touch Gamepad for Mobile & Touchscreens -->
       <div id="virtual-gamepad" class="virtual-gamepad">
         <div class="touch-cluster top-actions-cluster">
+          <button id="btn-touch-inventory" class="touch-btn btn-top-util" aria-label="Inventory" onclick="if (window.game && window.game.scene) { const gs = window.game.scene.getScene('GameScene'); if (gs && gs.toggleInventory) gs.toggleInventory(); }" style="color: #00f0ff; border-color: rgba(0, 240, 255, 0.4);">🎒</button>
           <button id="btn-touch-cheats" class="touch-btn btn-top-util" aria-label="Cheats" onclick="if (window.game && window.game.scene) { const gs = window.game.scene.getScene('GameScene'); if (gs && gs.uiSystem) gs.uiSystem.showCheatTerminal(); }" style="color: #c084fc; border-color: rgba(192, 132, 252, 0.4);">★</button>
           <button id="btn-touch-settings" class="touch-btn btn-top-util" aria-label="Settings" onclick="if (window.game && window.game.scene) { const gs = window.game.scene.getScene('GameScene'); if (gs && gs.uiSystem) gs.uiSystem.showSettings(); }">⚙</button>
           <button id="btn-touch-pause" class="touch-btn btn-top-util" aria-label="Pause" onclick="if (window.game && window.game.scene) { const gs = window.game.scene.getScene('GameScene'); if (gs && gs.togglePause) gs.togglePause(); }">⏸</button>
@@ -654,6 +656,8 @@
         <span>Jump: <span class="key-badge">W</span> / <span class="key-badge">SPACE</span></span>
         <span>Equip: <span class="key-badge">Q</span></span>
         <span>Fire: <span class="key-badge">E</span><span style="display:none">Attack: <span class="key-badge">F</span></span></span>
+        <span>Inv: <span class="key-badge">I</span></span>
+        <span>Weapons: <span class="key-badge">1-9</span></span>
         <span>Scores: <span class="key-badge">B</span></span>
         <span>Pause: <span class="key-badge">ESC</span></span>
         <span>Cheats: <span class="key-badge">C</span></span>

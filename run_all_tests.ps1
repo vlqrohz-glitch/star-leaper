@@ -11,6 +11,7 @@ $suites = @(
     "validate_expansion.ps1",
     "validate_stage10.ps1",
     "validate_boss_and_levels.ps1",
+    "validate_inventory_slots.ps1",
     "validate_netlify_deploy.ps1"
 )
 
@@ -25,5 +26,5 @@ foreach ($s in $suites) {
 }
 
 Write-Host "`n=======================================================" -ForegroundColor Green
-Write-Host "     ALL 11 TEST SUITES PASSED (283+ ASSERTIONS)       " -ForegroundColor Green
+Write-Host "     ALL 12 TEST SUITES PASSED (297+ ASSERTIONS)       " -ForegroundColor Green
 Write-Host "=======================================================" -ForegroundColor Green

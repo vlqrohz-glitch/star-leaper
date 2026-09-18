@@ -39,6 +39,7 @@ import { LEVEL_1_DATA } from '../levels/level1.js';
 import { ENEMY_CONFIG } from '../config/enemyConfig.js';
 import { HEALTH_CONFIG, LifeState } from '../config/playerHealthConfig.js';
 import { POWERUP_CONFIG, PowerUpState, PowerUpType } from '../config/powerUpConfig.js';
+import { INVENTORY_CATALOG } from '../config/inventoryConfig.js';
 
 /**
  * Main Game Scene - Star-Leaper: Orion Odyssey
@@ -241,9 +242,34 @@ export class GameScene extends Phaser.Scene {
       }
     });
 
-    // 13. Pause Key ('ESC') - Also returns to Main Menu from Level Complete screen
+    // In-game Inventory Weapon Arsenal Key ('I')
+    this.inventoryKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.I);
+    this.inventoryKey.on('down', () => this.toggleInventory());
+
+    // 1-9 Number Keybinds for Instant Inventory Weapon Selection
+    const slotKeyCodes = [
+      Phaser.Input.Keyboard.KeyCodes.ONE,
+      Phaser.Input.Keyboard.KeyCodes.TWO,
+      Phaser.Input.Keyboard.KeyCodes.THREE,
+      Phaser.Input.Keyboard.KeyCodes.FOUR,
+      Phaser.Input.Keyboard.KeyCodes.FIVE,
+      Phaser.Input.Keyboard.KeyCodes.SIX,
+      Phaser.Input.Keyboard.KeyCodes.SEVEN,
+      Phaser.Input.Keyboard.KeyCodes.EIGHT,
+      Phaser.Input.Keyboard.KeyCodes.NINE
+    ];
+    slotKeyCodes.forEach((kCode, idx) => {
+      const k = this.input.keyboard.addKey(kCode);
+      k.on('down', () => this.equipWeaponBySlot(idx + 1));
+    });
+
+    // 13. Pause Key ('ESC') - Also returns to Main Menu or dismisses open overlays
     this.pauseKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
     this.pauseKey.on('down', () => {
+      if (this.uiSystem && typeof this.uiSystem.isInventoryActive === 'function' && this.uiSystem.isInventoryActive()) {
+        this.uiSystem.hideInventory();
+        return;
+      }
       if (this.levelCompletionSystem && this.levelCompletionSystem.isLevelComplete()) {
         this.returnToTitleScreen();
         return;
@@ -687,6 +713,7 @@ export class GameScene extends Phaser.Scene {
     if (!bullet || !boss || boss.state === 'DEFEATED' || !bullet.active) return;
     const dmg = bullet.damage || 10;
     boss.takeDamage(dmg);
+    this.spawnDamagePopup(boss.x, boss.y - 20, dmg);
     if (bullet.explode) {
       bullet.explode(true);
     } else {
@@ -1120,6 +1147,19 @@ export class GameScene extends Phaser.Scene {
       this.handlePlayerAttack();
     }
 
+    // Player inventory toggle trigger via InputSystem [I]
+    if (this.inputSystem && typeof this.inputSystem.isInventoryJustPressed === 'function' && this.inputSystem.isInventoryJustPressed()) {
+      this.toggleInventory();
+    }
+
+    // Direct weapon hotkey slot trigger [1-9] via InputSystem
+    if (this.inputSystem && typeof this.inputSystem.getJustPressedSlot === 'function') {
+      const hotkeySlot = this.inputSystem.getJustPressedSlot();
+      if (hotkeySlot !== null) {
+        this.equipWeaponBySlot(hotkeySlot);
+      }
+    }
+
     // Telemetry readout
     const pos = `POS: X:${Math.round(this.player.x)}/${this.levelData.width} Y:${Math.round(this.player.y)}`;
     const cam = `CAM: ${Math.round(this.cameras.main.scrollX)}`;
@@ -1133,7 +1173,10 @@ export class GameScene extends Phaser.Scene {
    */
   createWeaponPickup() {
     if (!this.weaponPickups) {
-      this.weaponPickups = this.physics.add.group();
+      this.weaponPickups = this.physics.add.group({
+        allowGravity: false,
+        immovable: true
+      });
     }
 
     let wx = this.levelData.spawn.x + 180;
@@ -1153,6 +1196,11 @@ export class GameScene extends Phaser.Scene {
 
     const pickup = new WeaponPickup(this, wx, wy);
     this.weaponPickups.add(pickup);
+    if (pickup.body) {
+      pickup.body.setAllowGravity(false);
+      pickup.body.setImmovable(true);
+      pickup.body.setVelocity(0, 0);
+    }
     return pickup;
   }
 
@@ -1227,6 +1275,8 @@ export class GameScene extends Phaser.Scene {
     const dmg = bullet.damage || 10;
     bullet.explode(true);
 
+    this.spawnDamagePopup(enemy.x, enemy.y - 12, dmg);
+
     if (typeof enemy.takeDamage === 'function') {
       const remainingHp = enemy.takeDamage(dmg);
       if (remainingHp <= 0) {
@@ -1249,6 +1299,72 @@ export class GameScene extends Phaser.Scene {
       if (this.audioSystem) {
         this.audioSystem.playSFX(AUDIO_KEYS.ENEMY_DEFEATED || AUDIO_KEYS.POWERUP_ACTIVATE);
       }
+    }
+  }
+
+  /**
+   * Spawns a floating combat damage number that pops up and floats upward
+   * @param {number} x
+   * @param {number} y
+   * @param {number} amount
+   * @param {boolean} [isCrit=false]
+   */
+  spawnDamagePopup(x, y, amount, isCrit = false) {
+    const color = isCrit ? '#ef4444' : (amount >= 30 ? '#facc15' : '#00f0ff');
+    const text = this.add.text(x, y, `-${amount}`, {
+      fontFamily: 'Courier New, monospace',
+      fontSize: amount >= 30 ? '12px' : '10px',
+      fontStyle: 'bold',
+      color: color,
+      stroke: '#000000',
+      strokeThickness: 3
+    }).setOrigin(0.5).setDepth(28);
+
+    this.tweens.add({
+      targets: text,
+      y: y - 26,
+      scale: 1.25,
+      alpha: 0,
+      duration: 520,
+      ease: 'Cubic.easeOut',
+      onComplete: () => text.destroy()
+    });
+  }
+
+  /**
+   * Equips a weapon by its hotkey slot (1 through 9)
+   * @param {number} slot
+   */
+  equipWeaponBySlot(slot) {
+    if (this.uiSystem && (this.uiSystem.isTitleActive() || this.uiSystem.isGameOverActive())) {
+      return;
+    }
+    const item = INVENTORY_CATALOG.find(w => w.slot === slot);
+    if (!item) return;
+
+    if (this.player && typeof this.player.setWeapon === 'function') {
+      this.player.setWeapon(item.id);
+    }
+    if (this.audioSystem) {
+      this.audioSystem.playSFX(AUDIO_KEYS.UI_CONFIRM);
+    }
+    if (this.feedbackSystem) {
+      this.feedbackSystem.playerFlash(item.colorNum, 140);
+    }
+    if (this.uiSystem) {
+      this.uiSystem.updateHUD();
+      if (typeof this.uiSystem.refreshInventoryCards === 'function') {
+        this.uiSystem.refreshInventoryCards();
+      }
+    }
+  }
+
+  /**
+   * Toggles in-game inventory modal
+   */
+  toggleInventory() {
+    if (this.uiSystem && typeof this.uiSystem.toggleInventory === 'function') {
+      this.uiSystem.toggleInventory();
     }
   }
 
