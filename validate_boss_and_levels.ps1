@@ -34,25 +34,31 @@ $inputContent = Get-Content "src/systems/InputSystem.js" -Raw
 $hasEKeyUse = $inputContent -match "use:\s*Phaser\.Input\.Keyboard\.KeyCodes\.E"
 $hasAttackEKey = ($inputContent -match "isAttack\(\)") -and ($inputContent -match "this\.wasd\.use")
 $hasJustPressed = ($inputContent -match "isAttackJustPressed") -and ($inputContent -match "Phaser\.Input\.Keyboard\.JustDown\(this\.wasd\.use\)")
+$hasQKeyEquip = ($inputContent -match "equip:\s*Phaser\.Input\.Keyboard\.KeyCodes\.Q") -and ($inputContent -match "isEquipJustPressed")
 Assert-Test "INP-01" "InputSystem binds E key for weapon use and collect" $hasEKeyUse
 Assert-Test "INP-02" "InputSystem isAttack() responds to E key" $hasAttackEKey
 Assert-Test "INP-03" "InputSystem isAttackJustPressed() checks E key JustDown" $hasJustPressed
+Assert-Test "INP-04" "InputSystem binds Q key for weapon equip with isEquipJustPressed" $hasQKeyEquip
 
 # 2. WeaponPickup Entity & E Key prompt
 $pickupContent = Get-Content "src/entities/WeaponPickup.js" -Raw
 $hasPickupEPrompt = $pickupContent -match "\[E\] COLLECT"
+$hasPickupQPrompt = $pickupContent -match "\[Q\] EQUIP"
 $hasEquippedEPrompt = $pickupContent -match "PRESS \[E\] TO ATTACK"
 Assert-Test "WPN-01" "WeaponPickup overhead text displays [E] COLLECT prompt" $hasPickupEPrompt
 Assert-Test "WPN-02" "WeaponPickup banner guides player to press [E] to attack" $hasEquippedEPrompt
+Assert-Test "WPN-03" "WeaponPickup overhead text displays [Q] EQUIP prompt" $hasPickupQPrompt
 
 # 3. GameScene E Key Weapon Interaction
 $gameSceneContent = Get-Content "src/scenes/GameScene.js" -Raw
 $hasEKeyInScene = $gameSceneContent -match "this\.useKey\s*=\s*this\.input\.keyboard\.addKey\(Phaser\.Input\.Keyboard\.KeyCodes\.E\)"
+$hasQKeyInScene = ($gameSceneContent -match "this\.equipKey\s*=\s*this\.input\.keyboard\.addKey\(Phaser\.Input\.Keyboard\.KeyCodes\.Q\)") -and ($gameSceneContent -match "handleEquipKey\(\)")
 $hasHandleUseOrAttack = $gameSceneContent -match "handleUseOrAttackKey\(\)"
 $hasNearbyPickupTracking = $gameSceneContent -match "this\.nearbyWeaponPickup\s*=\s*pickup"
 Assert-Test "SCN-01" "GameScene listens for [E] key via keyboard input" $hasEKeyInScene
 Assert-Test "SCN-02" "GameScene implements handleUseOrAttackKey() to collect or fire weapon" $hasHandleUseOrAttack
 Assert-Test "SCN-03" "GameScene tracks nearby weapon pickups for [E] collection" $hasNearbyPickupTracking
+Assert-Test "SCN-04" "GameScene listens for [Q] key and implements handleEquipKey()" $hasQKeyInScene
 
 # 4. Combat Damage: Enemies deal 5 HP damage to Player
 $healthConfigContent = Get-Content "src/config/playerHealthConfig.js" -Raw

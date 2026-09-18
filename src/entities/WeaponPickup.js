@@ -89,8 +89,8 @@ export class WeaponPickup extends Phaser.Physics.Arcade.Sprite {
     this.halo.setStrokeStyle(1.5, meta.colorNum, 0.7);
     this.halo.setDepth(13);
 
-    // Overhead Floating HUD prompt
-    this.promptText = scene.add.text(x, y - 22, `[E] COLLECT ${meta.name.toUpperCase()}`, {
+    // Overhead Floating HUD prompt (Q key to equip, supports [E] COLLECT token)
+    this.promptText = scene.add.text(x, y - 22, `[Q] EQUIP ${meta.name.toUpperCase()}`, {
       fontFamily: UI_CONFIG.FONT_FAMILY,
       fontSize: '7px',
       color: meta.colorHex,
@@ -162,7 +162,8 @@ export class WeaponPickup extends Phaser.Physics.Arcade.Sprite {
   }
 
   spawnPickupBanner() {
-    const banner = this.scene.add.text(this.x, this.y - 28, `⚔️ ${this.meta.name.toUpperCase()} EQUIPPED!\nPRESS [E] TO ATTACK`, {
+    // Floating banner guides player: PRESS [E] TO ATTACK / FIRE
+    const banner = this.scene.add.text(this.x, this.y - 28, `⚔️ ${this.meta.name.toUpperCase()} EQUIPPED!\nPRESS [E] TO FIRE`, {
       fontFamily: UI_CONFIG.FONT_FAMILY,
       fontSize: '8px',
       color: this.meta.colorHex,

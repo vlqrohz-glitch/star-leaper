@@ -224,11 +224,14 @@ export class GameScene extends Phaser.Scene {
     this.restartKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R);
     this.restartKey.on('down', () => this.restartLevel());
 
-    // 12. Weapon Attack / Use / Collect Keys ('E' primary, 'F' secondary)
+    // 12. Weapon Controls: 'Q' to Equip / Collect, 'E' to Fire / Attack (also supports 'F' secondary)
+    this.equipKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Q);
+    this.equipKey.on('down', () => this.handleEquipKey());
+
     this.useKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E);
-    this.useKey.on('down', () => this.handleUseOrAttackKey());
+    this.useKey.on('down', () => this.handlePlayerAttack());
     this.attackKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.F);
-    this.attackKey.on('down', () => this.handleUseOrAttackKey());
+    this.attackKey.on('down', () => this.handlePlayerAttack());
 
     // Scoreboard Shortcut Key ('B')
     this.scoreboardKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.B);
@@ -1107,9 +1110,14 @@ export class GameScene extends Phaser.Scene {
       this.handlePlayerDeath('pit');
     }
 
-    // Player attack / use trigger via InputSystem (for virtual touch controls or key checks)
+    // Player equip trigger via InputSystem [Q]
+    if (this.inputSystem && typeof this.inputSystem.isEquipJustPressed === 'function' && this.inputSystem.isEquipJustPressed()) {
+      this.handleEquipKey();
+    }
+
+    // Player attack / fire trigger via InputSystem [E]
     if (this.inputSystem && typeof this.inputSystem.isAttackJustPressed === 'function' && this.inputSystem.isAttackJustPressed()) {
-      this.handleUseOrAttackKey();
+      this.handlePlayerAttack();
     }
 
     // Telemetry readout
@@ -1166,13 +1174,30 @@ export class GameScene extends Phaser.Scene {
   }
 
   /**
-   * Handles [E] key: collects weapon if near a pickup, or attacks with equipped firearm
+   * Handles [Q] key: equips / collects nearby weapon pickup, or cycles through collected firearms
+   */
+  handleEquipKey() {
+    if (this.uiSystem && (this.uiSystem.isTitleActive() || this.uiSystem.isPaused() || this.uiSystem.isGameOverActive())) {
+      return;
+    }
+    if (this.nearbyWeaponPickup && this.nearbyWeaponPickup.active && !this.nearbyWeaponPickup.isCollected) {
+      this.handleWeaponPickup(this.player, this.nearbyWeaponPickup);
+      this.nearbyWeaponPickup = null;
+      return;
+    }
+    if (this.player && typeof this.player.cycleWeapon === 'function') {
+      this.player.cycleWeapon();
+    }
+  }
+
+  /**
+   * Handles [E] key: fires equipped firearm (also collects if no weapon equipped)
    */
   handleUseOrAttackKey() {
     if (this.uiSystem && (this.uiSystem.isTitleActive() || this.uiSystem.isPaused() || this.uiSystem.isGameOverActive())) {
       return;
     }
-    if (this.nearbyWeaponPickup && this.nearbyWeaponPickup.active && !this.nearbyWeaponPickup.isCollected) {
+    if (this.nearbyWeaponPickup && this.nearbyWeaponPickup.active && !this.nearbyWeaponPickup.isCollected && (!this.player || !this.player.getWeapon())) {
       this.handleWeaponPickup(this.player, this.nearbyWeaponPickup);
       this.nearbyWeaponPickup = null;
       return;

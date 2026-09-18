@@ -521,7 +521,34 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   setWeapon(weaponType) {
     if (!weaponType) return;
     this.equippedWeapon = weaponType;
+    if (!this.unlockedWeapons) {
+      this.unlockedWeapons = ['REVOLVER'];
+    }
+    if (!this.unlockedWeapons.includes(weaponType)) {
+      this.unlockedWeapons.push(weaponType);
+    }
     this.attackCooldown = 0;
+  }
+
+  /**
+   * Cycles equipped weapon among collected firearms using the [Q] key
+   * @returns {string} The newly active weapon identifier
+   */
+  cycleWeapon() {
+    if (!this.unlockedWeapons) {
+      this.unlockedWeapons = ['REVOLVER'];
+    }
+    if (this.unlockedWeapons.length <= 1) {
+      return this.equippedWeapon || 'REVOLVER';
+    }
+    const curIdx = this.unlockedWeapons.indexOf(this.equippedWeapon || 'REVOLVER');
+    const nextIdx = (curIdx + 1) % this.unlockedWeapons.length;
+    this.setWeapon(this.unlockedWeapons[nextIdx]);
+
+    if (this.scene && this.scene.uiSystem && this.scene.uiSystem.hudWeaponText) {
+      this.scene.uiSystem.hudWeaponText.setText(`WEAPON: [${this.unlockedWeapons[nextIdx]}] [E]`);
+    }
+    return this.equippedWeapon;
   }
 
   /**

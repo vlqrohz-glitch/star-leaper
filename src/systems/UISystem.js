@@ -249,11 +249,11 @@ export class UISystem {
       strokeThickness: 3
     });
 
-    // Line 3: CONTROLS & SHORTCUT GUIDE (Primary Attack/Use: [E], also supports Attack: [F])
+    // Line 3: CONTROLS & SHORTCUT GUIDE (Primary: Equip: [Q], Fire/Attack: [E], also supports Attack/Use: [E] and Attack: [F])
     this.guideText = this.scene.add.text(
       pad.x,
       pad.y + 42,
-      'Move: [A/D] | Jump: [Space/W] | Attack/Use: [E] | Pause: [ESC] | Scores: [B] | Restart: [R]',
+      'Move: [A/D] | Jump: [Space/W] | Equip: [Q] | Fire: [E] | Pause: [ESC] | Scores: [B] | Restart: [R]',
       {
         fontFamily: UI_CONFIG.BODY_FONT_FAMILY,
         fontSize: '11px',
@@ -431,11 +431,11 @@ export class UISystem {
       this.titleContainer.add([btnBg, btnText]);
     });
 
-    // Controls tip (Primary Attack/Use: [E], also supports Attack: [F])
+    // Controls tip (Primary: Equip: [Q], Fire: [E], also supports Attack: [F] and Attack/Use: [E])
     const controlsTip = this.scene.add.text(
       0,
       144,
-      'Controls: [A/D] Move  •  [W]/[SPACE] Jump  •  [E] Attack  •  [ESC] Pause  •  [B] Scores',
+      'Controls: [A/D] Move  •  [W]/[SPACE] Jump  •  [Q] Equip  •  [E] Fire  •  [ESC] Pause  •  [B] Scores',
       {
         fontFamily: UI_CONFIG.BODY_FONT_FAMILY,
         fontSize: '10px',

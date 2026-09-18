@@ -11,6 +11,7 @@ export class InputSystem {
       down: Phaser.Input.Keyboard.KeyCodes.S,
       right: Phaser.Input.Keyboard.KeyCodes.D,
       space: Phaser.Input.Keyboard.KeyCodes.SPACE,
+      equip: Phaser.Input.Keyboard.KeyCodes.Q,
       use: Phaser.Input.Keyboard.KeyCodes.E,
       attack: Phaser.Input.Keyboard.KeyCodes.F
     });
@@ -23,6 +24,8 @@ export class InputSystem {
       jump: false,
       jumpJustPressed: false,
       jumpJustReleased: false,
+      equip: false,
+      equipJustPressed: false,
       attack: false,
       attackJustPressed: false
     };
@@ -87,5 +90,14 @@ export class InputSystem {
 
   isUseJustPressed() {
     return (this.wasd.use && Phaser.Input.Keyboard.JustDown(this.wasd.use));
+  }
+
+  isEquipJustPressed() {
+    const justPressed = (this.wasd.equip && Phaser.Input.Keyboard.JustDown(this.wasd.equip)) ||
+                        this.touchState.equipJustPressed;
+    if (this.touchState.equipJustPressed) {
+      this.touchState.equipJustPressed = false;
+    }
+    return justPressed;
   }
 }
